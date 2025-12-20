@@ -91,6 +91,21 @@
   overflow: hidden;
 }
 
+.loading-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #2563eb;
+  min-height: 3rem;
+  text-align: center;
+
+  .pi {
+    font-size: 1.2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .users-header {
     flex-direction: column;

@@ -7,8 +7,10 @@ import { User } from '../models/user.model';
 export class UserService {
   private readonly storageKey = 'users-data';
   private readonly _users = signal<User[]>([]);
+  private readonly _loading = signal<boolean>(true);
 
   readonly users = this._users.asReadonly();
+  readonly loading = this._loading.asReadonly();
 
   constructor() {
     const stored = localStorage.getItem(this.storageKey);
@@ -21,6 +23,8 @@ export class UserService {
         this._users.set([]);
       }
     }
+
+    this._loading.set(false);
   }
 
   add(user: User): void {
@@ -30,7 +34,7 @@ export class UserService {
 
   update(user: User): void {
     this._users.update((users) =>
-      users.map((existing) => (existing.id === user.id ? user : existing)),
+      users.map((existing) => (existing.id === user.id ? user : existing))
     );
     this.persist();
   }

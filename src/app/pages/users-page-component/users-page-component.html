@@ -23,6 +23,12 @@
     (save)="handleSave($event)"
   ></app-user-dialog-component>
 
+  @if (loading()) {
+  <div class="table-card loading-card">
+    <i class="pi pi-spinner pi-spin"></i>
+    <span>Loading users…</span>
+  </div>
+  } @else {
   <div class="table-card">
     <app-user-table-component
       [users]="users()"
@@ -31,6 +37,7 @@
       (remove)="handleDelete($event)"
     />
   </div>
+  }
 </div>
 
 <p-confirmDialog [closable]="false"></p-confirmDialog>

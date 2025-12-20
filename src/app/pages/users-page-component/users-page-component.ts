@@ -30,6 +30,7 @@ export class UsersPageComponent {
   private readonly confirmationService = inject(ConfirmationService);
 
   readonly users = this.userService.users;
+  readonly loading = this.userService.loading;
   readonly dialogVisible = signal(false);
   readonly dialogMode = signal<UserDialogMode>('add');
   readonly selectedUser = signal<User | null>(null);
