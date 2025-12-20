@@ -3,6 +3,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .users-table {
@@ -19,5 +20,10 @@
 
 .users-table .actions-cell {
   white-space: normal;
-  justify-content: flex-start;
+  justify-content: center;
+}
+
+:host ::ng-deep .users-table th,
+:host ::ng-deep .users-table td {
+  text-align: center !important;
 }
