@@ -28,12 +28,12 @@ The two pages are connected via Angular routing.
 - **Angular v21**
   - Standalone components
   - Modern dependency injection (`inject`)
-  - Signals for state management (`signal`, `input`, `effect`)
+  - Signals for state and inputs (`signal`, `input`, `model`)
   - Reactive forms
   - New Angular control flow syntax
 - **UI**
   - PrimeNG components (table, dialog, buttons, confirm dialog)
-  - PrimeNG preset-based theming (v19+ approach)
+  - PrimeIcons for icons (no global PrimeNG theme applied)
 - **State**
   - In-memory state stored in a service using signals
   - Optional localStorage persistence shown in code (disabled by default)
