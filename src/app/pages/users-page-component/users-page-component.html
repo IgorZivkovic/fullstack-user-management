@@ -1,28 +1,36 @@
-<div class="users-header">
-  <h2>Users page</h2>
+<div class="page">
+  <header class="users-header">
+    <div class="header-info">
+      <p class="eyebrow">Data Management</p>
+      <h2>Users</h2>
+      <p class="subtitle">Add, edit, view, and delete users via modal.</p>
+      <a routerLink="/" class="back-link">
+        <i class="pi pi-arrow-left"></i>
+        Back to Landing Page
+      </a>
+    </div>
+
+    <div class="actions-bar">
+      <p-button label="Add User" icon="pi pi-plus" (onClick)="openAdd()" />
+    </div>
+  </header>
+
+  <app-user-dialog-component
+    [visible]="dialogVisible()"
+    [mode]="dialogMode()"
+    [user]="selectedUser()"
+    (close)="handleClose()"
+    (save)="handleSave($event)"
+  ></app-user-dialog-component>
+
+  <div class="table-card">
+    <app-user-table-component
+      [users]="users()"
+      (view)="openView($event)"
+      (edit)="openEdit($event)"
+      (remove)="handleDelete($event)"
+    />
+  </div>
 </div>
-
-<div class="actions-bar">
-  <a routerLink="/" class="p-button p-button-text">
-    <i class="pi pi-arrow-left"></i>
-    Back to Landing Page
-  </a>
-  <p-button label="Add User" icon="pi pi-plus" (onClick)="openAdd()" />
-</div>
-
-<app-user-dialog-component
-  [visible]="dialogVisible()"
-  [mode]="dialogMode()"
-  [user]="selectedUser()"
-  (close)="handleClose()"
-  (save)="handleSave($event)"
-></app-user-dialog-component>
-
-<app-user-table-component
-  [users]="users()"
-  (view)="openView($event)"
-  (edit)="openEdit($event)"
-  (remove)="handleDelete($event)"
-/>
 
 <p-confirmDialog></p-confirmDialog>

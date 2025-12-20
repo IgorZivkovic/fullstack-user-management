@@ -1,6 +1,23 @@
 <section class="hero">
-  <h1>User Management</h1>
-  <p>Simple Angular application demonstrating routing, forms, and frontend state management.</p>
+  <div class="hero__content">
+    <p class="hero__eyebrow">Angular Frontend Assignment</p>
+    <h1>User Management</h1>
+    <p class="hero__lead">
+      A small, modern Angular app showcasing routing, modals, reactive forms, and frontend state.
+    </p>
+    <div class="hero__actions">
+      <a routerLink="/users" class="cta cta--primary">Open Data Management</a>
+      <a href="#highlights" class="cta cta--ghost">See highlights</a>
+    </div>
+  </div>
 
-  <a routerLink="/users" class="cta"> Go to Data Management </a>
+  <div class="hero__panel" id="highlights">
+    <h3>What&apos;s inside</h3>
+    <ul>
+      <li>Reactive forms with validation</li>
+      <li>Modal-driven add, edit, view, and delete</li>
+      <li>PrimeNG UI components and icons</li>
+      <li>Clean navigation between pages</li>
+    </ul>
+  </div>
 </section>
