@@ -8,14 +8,20 @@
     Back to Landing Page
   </a>
   <p-button label="Add User" icon="pi pi-plus" (onClick)="openAdd()" />
-
-  <app-user-dialog-component
-    [visible]="dialogVisible()"
-    [mode]="dialogMode()"
-    [user]="selectedUser()"
-    (close)="handleClose()"
-    (save)="handleSave($event)"
-  ></app-user-dialog-component>
 </div>
 
-<app-user-table-component [users]="users()" />
+<app-user-dialog-component
+  [visible]="dialogVisible()"
+  [mode]="dialogMode()"
+  [user]="selectedUser()"
+  (close)="handleClose()"
+  (save)="handleSave($event)"
+></app-user-dialog-component>
+
+<app-user-table-component
+  [users]="users()"
+  (edit)="openEdit($event)"
+  (remove)="handleDelete($event)"
+/>
+
+<p-confirmDialog></p-confirmDialog>

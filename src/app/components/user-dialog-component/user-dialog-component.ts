@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 import { DialogModule } from 'primeng/dialog';
@@ -25,7 +33,7 @@ export type UserDialogMode = 'add' | 'edit' | 'view';
   templateUrl: './user-dialog-component.html',
   styleUrl: './user-dialog-component.scss',
 })
-export class UserDialogComponent {
+export class UserDialogComponent implements OnChanges {
   private readonly fb = inject(FormBuilder);
 
   @Input({ required: true }) visible = false;
@@ -57,6 +65,16 @@ export class UserDialogComponent {
         return 'Edit User';
       case 'view':
         return 'View User';
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const becameVisible = changes['visible']?.currentValue === true;
+    const updatedWhileOpen =
+      (changes['user'] || changes['mode']) && this.visible;
+
+    if (becameVisible || updatedWhileOpen) {
+      this.initFromUser();
     }
   }
 

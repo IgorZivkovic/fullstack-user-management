@@ -6,6 +6,7 @@
       <th>Birthday</th>
       <th>Gender</th>
       <th>Country</th>
+      <th>Actions</th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-user>
@@ -15,11 +16,26 @@
       <td>{{ user.birthday }}</td>
       <td>{{ user.gender }}</td>
       <td>{{ user.country }}</td>
+      <td class="actions-cell">
+        <p-button
+          label="Edit"
+          icon="pi pi-pencil"
+          size="small"
+          (onClick)="edit.emit(user)"
+        ></p-button>
+        <p-button
+          label="Delete"
+          icon="pi pi-trash"
+          severity="danger"
+          size="small"
+          (onClick)="remove.emit(user)"
+        ></p-button>
+      </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="5">No users yet. Click "Add User" to create one.</td>
+      <td colspan="6">No users yet. Click "Add User" to create one.</td>
     </tr>
   </ng-template>
 </p-table>

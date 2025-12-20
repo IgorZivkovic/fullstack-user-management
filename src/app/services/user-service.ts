@@ -21,6 +21,13 @@ export class UserService {
     // this.persist();
   }
 
+  update(user: User): void {
+    this._users.update((users) =>
+      users.map((existing) => (existing.id === user.id ? user : existing)),
+    );
+    // this.persist();
+  }
+
   remove(id: number): void {
     this._users.update((users) => users.filter((u) => u.id !== id));
     // this.persist();
