@@ -5,35 +5,40 @@ import { User } from '../models/user.model';
   providedIn: 'root',
 })
 export class UserService {
+  private readonly storageKey = 'users-data';
   private readonly _users = signal<User[]>([]);
 
   readonly users = this._users.asReadonly();
 
   constructor() {
-    // const stored = localStorage.getItem(this.storageKey);
-    // if (stored) {
-    //   this._users.set(JSON.parse(stored));
-    // }
+    const stored = localStorage.getItem(this.storageKey);
+    if (stored) {
+      try {
+        this._users.set(JSON.parse(stored));
+      } catch {
+        localStorage.removeItem(this.storageKey);
+      }
+    }
   }
 
   add(user: User): void {
     this._users.update((users) => [...users, user]);
-    // this.persist();
+    this.persist();
   }
 
   update(user: User): void {
     this._users.update((users) =>
       users.map((existing) => (existing.id === user.id ? user : existing)),
     );
-    // this.persist();
+    this.persist();
   }
 
   remove(id: number): void {
     this._users.update((users) => users.filter((u) => u.id !== id));
-    // this.persist();
+    this.persist();
   }
 
-  // private persist(): void {
-  //   localStorage.setItem(this.storageKey, JSON.stringify(this._users()));
-  // }
+  private persist(): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(this._users()));
+  }
 }

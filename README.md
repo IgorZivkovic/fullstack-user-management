@@ -36,7 +36,7 @@ The two pages are connected via Angular routing.
   - PrimeIcons for icons (no global PrimeNG theme applied)
 - **State**
   - In-memory state stored in a service using signals
-  - Optional localStorage persistence shown in code (disabled by default)
+  - LocalStorage persistence included (enabled by default); remove/skip `persist()` if you prefer purely in-memory
 - **Styling**
   - SCSS with variables and nesting
   - Component-scoped styles
