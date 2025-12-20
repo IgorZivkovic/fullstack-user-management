@@ -2,4 +2,22 @@
 .actions-cell {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.users-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.users-table th,
+.users-table td {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.users-table .actions-cell {
+  white-space: normal;
+  justify-content: flex-start;
 }

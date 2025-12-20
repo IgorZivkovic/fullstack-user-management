@@ -151,9 +151,32 @@ $panel-border: rgba(15, 23, 42, 0.08);
 @media (max-width: 768px) {
   .hero {
     padding: 2.5rem 1.25rem;
+    text-align: center;
   }
 
   .hero__panel {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .hero__content {
+    .hero__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 2rem 1rem;
+  }
+
+  .hero__panel {
+    padding: 1.25rem;
+  }
+
+  .cta {
     width: 100%;
   }
 }

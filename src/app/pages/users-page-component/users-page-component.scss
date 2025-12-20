@@ -88,16 +88,41 @@
   border: 1px solid rgba(15, 23, 42, 0.06);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
   padding: 0.5rem;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
   .users-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1rem 1.1rem;
   }
 
   .actions-bar {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .table-card {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .users-header {
+    padding: 0.9rem 1rem;
+  }
+
+  .actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    p-button {
+      width: 100%;
+    }
   }
 }

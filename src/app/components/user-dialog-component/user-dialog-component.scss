@@ -21,3 +21,8 @@
 :host ::ng-deep .field .p-datepicker {
   width: 100%;
 }
+
+:host ::ng-deep .user-dialog {
+  width: 480px;
+  max-width: 95vw;
+}

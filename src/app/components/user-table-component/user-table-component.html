@@ -1,4 +1,10 @@
-<p-table [value]="users" dataKey="id" [tableStyle]="{ 'min-width': '40rem' }">
+<p-table
+  [value]="users"
+  dataKey="id"
+  responsiveLayout="stack"
+  breakpoint="960px"
+  tableStyleClass="users-table"
+>
   <ng-template pTemplate="header">
     <tr>
       <th>ID</th>
