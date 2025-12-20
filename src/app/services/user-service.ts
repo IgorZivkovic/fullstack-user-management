@@ -15,8 +15,10 @@ export class UserService {
     if (stored) {
       try {
         this._users.set(JSON.parse(stored));
-      } catch {
+      } catch (error) {
+        console.error('Failed to parse stored users:', error);
         localStorage.removeItem(this.storageKey);
+        this._users.set([]);
       }
     }
   }
