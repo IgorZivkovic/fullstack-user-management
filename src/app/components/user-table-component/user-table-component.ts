@@ -14,6 +14,7 @@ import { User } from '../../models/user.model';
 export class UserTableComponent {
   @Input({ required: true }) users: User[] = [];
 
+  @Output() view = new EventEmitter<User>();
   @Output() edit = new EventEmitter<User>();
   @Output() remove = new EventEmitter<User>();
 }

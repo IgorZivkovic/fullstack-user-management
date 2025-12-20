@@ -18,6 +18,12 @@
       <td>{{ user.country }}</td>
       <td class="actions-cell">
         <p-button
+          label="View"
+          icon="pi pi-eye"
+          size="small"
+          (onClick)="view.emit(user)"
+        ></p-button>
+        <p-button
           label="Edit"
           icon="pi pi-pencil"
           size="small"

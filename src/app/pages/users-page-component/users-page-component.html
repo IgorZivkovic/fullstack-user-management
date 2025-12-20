@@ -1,5 +1,5 @@
 <div class="users-header">
-  <h2>Users</h2>
+  <h2>Users page</h2>
 </div>
 
 <div class="actions-bar">
@@ -20,6 +20,7 @@
 
 <app-user-table-component
   [users]="users()"
+  (view)="openView($event)"
   (edit)="openEdit($event)"
   (remove)="handleDelete($event)"
 />

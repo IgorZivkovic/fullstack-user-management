@@ -50,6 +50,12 @@ export class UsersPageComponent {
     this.dialogVisible.set(true);
   }
 
+  openView(user: User): void {
+    this.dialogMode.set('view');
+    this.selectedUser.set(user);
+    this.dialogVisible.set(true);
+  }
+
   handleSave(user: User): void {
     if (this.dialogMode() === 'edit') {
       this.userService.update(user);
