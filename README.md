@@ -91,6 +91,38 @@ npm run build      # web only
 npm run build:all  # web + api
 ```
 
+## Database
+
+The API uses Drizzle ORM with SQLite. Defaults are in `.env`.
+
+```
+DATABASE_URL=./user_management.db
+```
+
+Generate migrations after changing the schema:
+
+```bash
+npm run db:generate
+```
+
+Apply migrations:
+
+```bash
+npm run db:migrate
+```
+
+Optional Drizzle Studio:
+
+```bash
+npm run db:studio
+```
+
+One-shot setup (migrate + both apps):
+
+```bash
+npm run start:full
+```
+
 ## Nx workspace notes
 
 Common tasks:
