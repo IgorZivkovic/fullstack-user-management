@@ -75,7 +75,6 @@ export class UserService {
     this._loading.set(true);
     this.http.get<User[]>(`${this.apiBaseUrl}/users`).subscribe({
       next: (users) => {
-        console.log('Fetched users from API:', users);
         this._users.set(users);
         // this.persist();
         this._loading.set(false);
