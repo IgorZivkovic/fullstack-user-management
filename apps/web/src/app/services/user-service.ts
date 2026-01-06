@@ -1,10 +1,12 @@
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
+  private readonly apiBaseUrl = 'http://localhost:3000/api/v1';
   private readonly storageKey = 'users-data';
   private readonly _users = signal<User[]>([]);
   private readonly _loading = signal<boolean>(true);
@@ -12,7 +14,7 @@ export class UserService {
   readonly users = this._users.asReadonly();
   readonly loading = this._loading.asReadonly();
 
-  constructor() {
+  constructor(private readonly http: HttpClient) {
     const stored = localStorage.getItem(this.storageKey);
     if (stored) {
       try {
@@ -24,7 +26,7 @@ export class UserService {
       }
     }
 
-    this._loading.set(false);
+    this.fetchFromApi();
   }
 
   add(user: User): void {
@@ -46,5 +48,21 @@ export class UserService {
 
   private persist(): void {
     localStorage.setItem(this.storageKey, JSON.stringify(this._users()));
+  }
+
+  private fetchFromApi(): void {
+    this._loading.set(true);
+    this.http.get<User[]>(`${this.apiBaseUrl}/users`).subscribe({
+      next: (users) => {
+        console.log('Fetched users from API:', users);
+        this._users.set(users);
+        this.persist();
+        this._loading.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to fetch users from API:', error);
+        this._loading.set(false);
+      },
+    });
   }
 }

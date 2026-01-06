@@ -42,12 +42,18 @@ export class UsersService {
 
   private cleanUpdatePayload(input: UpdateUserDto) {
     const payload: Partial<UpdateUserDto> = {};
-    (['name', 'birthday', 'gender', 'country'] as const).forEach((key) => {
-      const value = input[key];
-      if (value !== undefined) {
-        payload[key] = value;
-      }
-    });
+    if (input.name !== undefined) {
+      payload.name = input.name;
+    }
+    if (input.birthday !== undefined) {
+      payload.birthday = input.birthday;
+    }
+    if (input.gender !== undefined) {
+      payload.gender = input.gender;
+    }
+    if (input.country !== undefined) {
+      payload.country = input.country;
+    }
     return payload;
   }
 }
