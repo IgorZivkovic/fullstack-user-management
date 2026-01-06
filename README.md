@@ -110,6 +110,19 @@ Pagination and filtering for the list endpoint:
 GET /api/v1/users?page=1&pageSize=10&search=ana&gender=female
 ```
 
+Error responses use a consistent shape with `errorCode` and optional `details` for validation failures:
+
+```json
+{
+  "statusCode": 400,
+  "errorCode": "VALIDATION_ERROR",
+  "timestamp": "2026-01-07T09:15:22.123Z",
+  "path": "/api/v1/users",
+  "message": "Validation failed",
+  "details": ["name should not be empty"]
+}
+```
+
 Both apps in parallel:
 
 ```bash

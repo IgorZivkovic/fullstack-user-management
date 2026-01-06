@@ -1,27 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
 const genderValues = ['male', 'female', 'other'] as const;
 
-export class CreateUserDto {
+export class UserResponseDto {
+  @ApiProperty({ example: 1 })
+  id!: number;
+
   @ApiProperty({ example: 'Noah Rossi' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
   name!: string;
 
-  @ApiProperty({ example: '2000-09-05', description: 'YYYY-MM-DD' })
-  @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  @ApiProperty({ example: '2000-09-05' })
   birthday!: string;
 
   @ApiProperty({ enum: genderValues, example: 'female' })
-  @IsIn(genderValues)
   gender!: (typeof genderValues)[number];
 
   @ApiProperty({ example: 'Italy' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
   country!: string;
 }
