@@ -1,6 +1,6 @@
 # Full-stack user management demo (Angular + NestJS + Drizzle)
 
-Small Angular v21 application demonstrating a user management UI.
+Small full-stack demo with an Angular v21 UI and NestJS API.
 
 This repo is an Nx workspace with:
 - Angular app at `apps/web`
@@ -20,14 +20,13 @@ The two pages are connected via Angular routing.
 
 - User list displayed in a table with the following fields:
   - id, name, birthday, gender, country
-- Full CRUD functionality:
+- Full CRUD functionality (API-backed):
   - Add user (modal)
   - Edit user (modal)
   - View user (read-only modal)
   - Delete user (confirmation dialog)
-- Loading indicator while state initializes
-- Frontend-only state management for now; API integration is planned
-- State survives page navigation
+- Pagination and filtering (search + gender)
+- Loading indicator while API requests are in flight
 
 ## Technical Details
 
@@ -42,13 +41,16 @@ The two pages are connected via Angular routing.
   - PrimeIcons for icons (no global PrimeNG theme applied)
   - Reusable standalone confirm dialog component
 - **State**
-  - In-memory state stored in a service using signals
-  - LocalStorage persistence included (enabled by default); remove/skip `persist()` if you prefer purely in-memory
-  - Loading flag exposed to gate UI while state hydrates
+  - UI state stored in a service using signals
+  - Data fetched from the API via HttpClient
+  - Legacy localStorage persistence kept as commented reference code
+  - Loading flag exposed to gate UI while requests are in flight
 - **Styling**
   - SCSS with variables and nesting
   - Component-scoped styles
   - Responsive layout
+ - **Backend**
+  - Request logging middleware (method, path, status, duration)
 
 ## Architecture
 
