@@ -11,7 +11,9 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
-  const globalPrefix = config.get('API_PREFIX', 'api');
+  const apiPrefix = config.get('API_PREFIX', 'api');
+  const apiVersion = config.get('API_VERSION', 'v1');
+  const globalPrefix = `${apiPrefix}/${apiVersion}`;
   app.setGlobalPrefix(globalPrefix);
   const port = Number(config.get('PORT', 3000));
   await app.listen(port);

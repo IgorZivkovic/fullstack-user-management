@@ -76,7 +76,7 @@ Backend (api):
 npm run start:api
 ```
 
-By default the API runs on http://localhost:3000/.
+By default the API runs on http://localhost:3000/api/v1.
 
 Both apps in parallel:
 
