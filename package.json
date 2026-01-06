@@ -1,12 +1,12 @@
 {
-  "name": "igor-angular-assignment",
+  "name": "web",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "start": "nx serve",
+    "build": "nx build",
+    "watch": "nx build --watch --configuration development",
+    "test": "nx test"
   },
   "prettier": {
     "printWidth": 100,
@@ -36,10 +36,18 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@angular-devkit/core": "^21.0.4",
+    "@angular-devkit/schematics": "^21.0.4",
     "@angular/build": "^21.0.4",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.0",
+    "@eslint/js": "~8.57.0",
+    "@nx/angular": "22.3.3",
+    "@nx/eslint-plugin": "22.3.3",
+    "@nx/workspace": "22.3.3",
+    "@schematics/angular": "^21.0.4",
     "jsdom": "^27.1.0",
+    "nx": "22.3.3",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }
