@@ -86,6 +86,16 @@ Health check:
 GET http://localhost:3000/api/v1/health
 ```
 
+Users endpoints:
+
+```
+GET    /api/v1/users
+GET    /api/v1/users/:id
+POST   /api/v1/users
+PUT    /api/v1/users/:id
+DELETE /api/v1/users/:id
+```
+
 Both apps in parallel:
 
 ```bash
