@@ -61,6 +61,8 @@ The two pages are connected via Angular routing.
 
 Defaults are provided in `.env` (tracked); adjust values there if needed.
 
+Frontend origin for CORS is controlled by `WEB_ORIGIN` in `.env`.
+
 Frontend (web):
 
 ```bash
