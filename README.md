@@ -78,6 +78,12 @@ npm run start:api
 
 By default the API runs on http://localhost:3000/api/v1.
 
+Health check:
+
+```
+GET http://localhost:3000/api/v1/health
+```
+
 Both apps in parallel:
 
 ```bash
