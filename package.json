@@ -6,13 +6,14 @@
     "start": "nx serve web",
     "start:api": "nx serve api",
     "start:all": "nx run-many -t serve --projects=web,api --parallel=2",
-    "start:full": "npm run db:migrate && npm run start:all",
+    "start:full": "npm run db:migrate && npm run db:seed && npm run start:all",
     "build": "nx build web",
     "build:all": "nx run-many -t build --projects=web,api",
     "watch": "nx build web --watch --configuration development",
     "test": "nx test web",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:seed": "node -r dotenv/config api/scripts/seed.mjs",
     "db:studio": "drizzle-kit studio"
   },
   "prettier": {
@@ -73,6 +74,7 @@
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^30.0.0",
     "@types/node": "20.19.9",
     "dotenv": "^17.2.3",

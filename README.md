@@ -111,13 +111,43 @@ Apply migrations:
 npm run db:migrate
 ```
 
+Seed demo data (50+ users):
+
+```bash
+npm run db:seed
+```
+
+Change the number of seeded users:
+
+```bash
+SEED_COUNT=80 npm run db:seed
+```
+
+PowerShell:
+
+```powershell
+$env:SEED_COUNT=80; npm run db:seed
+```
+
+To force reseeding (clears existing users):
+
+```bash
+SEED_FORCE=1 npm run db:seed
+```
+
+PowerShell:
+
+```powershell
+$env:SEED_FORCE=1; npm run db:seed
+```
+
 Optional Drizzle Studio:
 
 ```bash
 npm run db:studio
 ```
 
-One-shot setup (migrate + both apps):
+One-shot setup (migrate + seed if empty + both apps):
 
 ```bash
 npm run start:full
