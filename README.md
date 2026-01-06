@@ -5,7 +5,7 @@ Small Angular v21 application demonstrating a user management UI.
 This repo is an Nx workspace with:
 - Angular app at `apps/web`
 - NestJS API at `api`
-- Shared library at `shared` (imported via `@shared/*`)
+- Shared library at `shared` for types/interfaces/DTOs (imported via `@shared/*`)
 
 ## Overview
 
@@ -59,6 +59,8 @@ The two pages are connected via Angular routing.
 
 ## Running the project
 
+Frontend (web):
+
 ```bash
 npm install
 npm start  # runs: nx serve web
@@ -66,16 +68,25 @@ npm start  # runs: nx serve web
 
 Then open http://localhost:4200/.
 
-To run the backend:
+Backend (api):
 
 ```bash
 npm run start:api
 ```
 
-To run both apps in parallel:
+By default the API runs on http://localhost:3000/.
+
+Both apps in parallel:
 
 ```bash
 npm run start:all
+```
+
+Build:
+
+```bash
+npm run build      # web only
+npm run build:all  # web + api
 ```
 
 ## Nx workspace notes
