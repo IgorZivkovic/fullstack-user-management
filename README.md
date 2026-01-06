@@ -1,4 +1,4 @@
-# User Management Angular Demo
+# Full-stack user management demo (Angular + NestJS + Drizzle)
 
 Small Angular v21 application demonstrating a user management UI.
 
