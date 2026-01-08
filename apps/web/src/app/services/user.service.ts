@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { User } from '../models/user.model';
+import { environment } from '../../environments/environment';
 
 type UsersResponse = {
   data: User[];
@@ -24,7 +25,7 @@ type UsersQueryParams = {
   providedIn: 'root',
 })
 export class UserService {
-  private readonly apiBaseUrl = 'http://localhost:3000/api/v1';
+  private readonly apiBaseUrl = environment.apiBaseUrl;
   // Legacy localStorage support (used before the API was implemented and wired).
   // Leave this commented for reference during development.
   // private readonly storageKey = 'users-data';

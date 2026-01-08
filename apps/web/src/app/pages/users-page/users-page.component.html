@@ -38,22 +38,22 @@
     </div>
   </div>
 
-  <app-user-dialog-component
+  <app-user-dialog
     [visible]="dialogVisible()"
     [mode]="dialogMode()"
     [user]="selectedUser()"
     (close)="handleClose()"
     (save)="handleSave($event)"
-  ></app-user-dialog-component>
+  ></app-user-dialog>
 
   @if (loading()) {
   <div class="table-card loading-card">
     <i class="pi pi-spinner pi-spin"></i>
-    <span>Loading users…</span>
+    <span>Loading users...</span>
   </div>
   } @else {
   <div class="table-card">
-    <app-user-table-component
+    <app-user-table
       [users]="users()"
       [first]="first"
       [totalRecords]="total()"
@@ -67,4 +67,4 @@
   }
 </div>
 
-<app-confirm-dialog-component></app-confirm-dialog-component>
+<app-confirm-dialog></app-confirm-dialog>

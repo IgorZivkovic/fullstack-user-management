@@ -13,7 +13,7 @@ import { Gender, User } from '../../models/user.model';
 export type UserDialogMode = 'add' | 'edit' | 'view';
 
 @Component({
-  selector: 'app-user-dialog-component',
+  selector: 'app-user-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -24,8 +24,8 @@ export type UserDialogMode = 'add' | 'edit' | 'view';
     DatePickerModule,
     ReactiveFormsModule,
   ],
-  templateUrl: './user-dialog-component.html',
-  styleUrl: './user-dialog-component.scss',
+  templateUrl: './user-dialog.component.html',
+  styleUrl: './user-dialog.component.scss',
 })
 export class UserDialogComponent {
   private readonly fb = inject(FormBuilder);

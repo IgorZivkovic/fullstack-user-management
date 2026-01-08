@@ -1,8 +1,8 @@
 import { Component, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { UserService } from '../../services/user-service';
-import { UserTableComponent } from '../../components/user-table-component/user-table-component';
+import { UserService } from '../../services/user.service';
+import { UserTableComponent } from '../../components/user-table/user-table.component';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmationService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,12 +10,12 @@ import { SelectModule } from 'primeng/select';
 import {
   UserDialogComponent,
   UserDialogMode,
-} from '../../components/user-dialog-component/user-dialog-component';
-import { ConfirmDialogComponent } from '../../components/confirm-dialog-component/confirm-dialog-component';
+} from '../../components/user-dialog/user-dialog.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { Gender, User } from '../../models/user.model';
 
 @Component({
-  selector: 'app-users-page-component',
+  selector: 'app-users-page',
   standalone: true,
   imports: [
     FormsModule,
@@ -27,8 +27,8 @@ import { Gender, User } from '../../models/user.model';
     UserDialogComponent,
     ConfirmDialogComponent,
   ],
-  templateUrl: './users-page-component.html',
-  styleUrl: './users-page-component.scss',
+  templateUrl: './users-page.component.html',
+  styleUrl: './users-page.component.scss',
   providers: [ConfirmationService],
 })
 export class UsersPageComponent {

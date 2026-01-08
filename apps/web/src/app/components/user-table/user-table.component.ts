@@ -5,11 +5,11 @@ import { ButtonModule } from 'primeng/button';
 import { User } from '../../models/user.model';
 
 @Component({
-  selector: 'app-user-table-component',
+  selector: 'app-user-table',
   standalone: true,
   imports: [CommonModule, TableModule, ButtonModule],
-  templateUrl: './user-table-component.html',
-  styleUrl: './user-table-component.scss',
+  templateUrl: './user-table.component.html',
+  styleUrl: './user-table.component.scss',
 })
 export class UserTableComponent {
   @Input({ required: true }) users: User[] = [];
