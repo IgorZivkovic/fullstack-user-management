@@ -12,9 +12,10 @@ This repo is an Nx workspace with:
 The application consists of:
 
 - A **Landing Page** demonstrating layout, SCSS structure, and responsive design
+- A **Login Page** for email/password sign-in before accessing protected routes
 - A **Data Management Page** for managing users via a table and modal dialogs
 
-The two pages are connected via Angular routing.
+The pages are connected via Angular routing, with `/users` protected by auth.
 
 ## Features
 
