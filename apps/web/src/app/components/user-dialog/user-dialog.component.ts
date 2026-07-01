@@ -104,11 +104,15 @@ export class UserDialogComponent {
     }
 
     const raw = this.form.getRawValue();
+    const birthday = raw.birthday;
+    if (!birthday) {
+      return;
+    }
 
     const result: User = {
       id: raw.id || Date.now(),
       name: raw.name.trim(),
-      birthday: this.dateToIso(raw.birthday!),
+      birthday: this.dateToIso(birthday),
       gender: raw.gender,
       country: raw.country.trim(),
     };

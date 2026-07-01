@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, eq, or, sql } from 'drizzle-orm';
 import { DatabaseService } from '../db/db.service';
 import { users } from '../db/schema';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,8 +18,13 @@ export class UsersService {
 
     const filters = [];
     if (search) {
-      const term = `%${search}%`;
-      filters.push(or(like(users.name, term), like(users.country, term)));
+      const term = `%${this.escapeLike(search)}%`;
+      filters.push(
+        or(
+          sql`${users.name} like ${term} escape '\\'`,
+          sql`${users.country} like ${term} escape '\\'`,
+        ),
+      );
     }
     if (gender) {
       filters.push(eq(users.gender, gender));
@@ -94,5 +99,9 @@ export class UsersService {
       payload.country = input.country;
     }
     return payload;
+  }
+
+  private escapeLike(value: string) {
+    return value.replace(/[\\%_]/g, (character) => `\\${character}`);
   }
 }

@@ -30,7 +30,6 @@
       "!{projectRoot}/test-setup.[jt]s"
     ]
   },
-  "nxCloudId": "695d34341aecbd5cb7d6fc87",
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",
@@ -56,5 +55,6 @@
         "serveStaticTargetName": "serve-static"
       }
     }
-  ]
+  ],
+  "analytics": false
 }

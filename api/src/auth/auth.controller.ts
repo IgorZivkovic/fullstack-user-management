@@ -16,7 +16,11 @@ import { ErrorResponseDto } from '../common/dto/error-response.dto';
 import { AuthUsersService } from './auth-users.service';
 import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthService } from './auth.service';
-import { AccessTokenResponseDto, AuthUserResponseDto, LogoutResponseDto } from './dto/auth-response.dto';
+import {
+  AccessTokenResponseDto,
+  AuthUserResponseDto,
+  LogoutResponseDto,
+} from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -43,8 +47,9 @@ export class AuthController {
   login(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-    @Body() _body: LoginDto,
+    @Body() body: LoginDto,
   ) {
+    void body;
     const user = request.user as { id: number; email: string; role: string; tokenVersion: number };
     const accessToken = this.authService.issueAccessToken(user);
     const refreshToken = this.authService.issueRefreshToken(user);

@@ -42,7 +42,7 @@ async function seedAdminUser() {
       .from(authUsers)
       .where(eq(authUsers.email, adminEmail))
       .get();
-  } catch (error) {
+  } catch {
     console.warn('Auth users table missing. Run migrations before seeding auth users.');
     return;
   }

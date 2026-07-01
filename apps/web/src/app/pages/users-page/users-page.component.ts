@@ -1,12 +1,15 @@
-import { Component, ViewChild, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ViewChild, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
 import { ButtonModule } from 'primeng/button';
-import { ConfirmationService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { ToastModule } from 'primeng/toast';
 import {
   UserDialogComponent,
   UserDialogMode,
@@ -24,21 +27,25 @@ import { AuthService } from '../../services/auth.service';
     RouterLink,
     InputTextModule,
     SelectModule,
+    ToastModule,
     UserTableComponent,
     UserDialogComponent,
     ConfirmDialogComponent,
   ],
   templateUrl: './users-page.component.html',
   styleUrl: './users-page.component.scss',
-  providers: [ConfirmationService],
+  providers: [ConfirmationService, MessageService],
 })
 export class UsersPageComponent {
   @ViewChild(UserDialogComponent) dialogComponent?: UserDialogComponent;
 
   private readonly userService = inject(UserService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly messageService = inject(MessageService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly searchChanges = new Subject<string>();
 
   readonly users = this.userService.users;
   readonly loading = this.userService.loading;
@@ -60,6 +67,27 @@ export class UsersPageComponent {
   ];
 
   constructor() {
+    this.searchChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        this.searchTerm = value;
+        this.first = 0;
+        this.loadUsers(1);
+      });
+
+    effect(() => {
+      const error = this.userService.operationError();
+      if (!error) {
+        return;
+      }
+
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Request failed',
+        detail: error.message,
+      });
+    });
+
     this.loadUsers();
   }
 
@@ -132,8 +160,7 @@ export class UsersPageComponent {
 
   handleSearchChange(value: string): void {
     this.searchTerm = value;
-    this.first = 0;
-    this.loadUsers(1);
+    this.searchChanges.next(value);
   }
 
   handleGenderChange(value: Gender | 'all'): void {

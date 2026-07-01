@@ -19,6 +19,7 @@ export class AuthService {
   private readonly accessExpiresIn: JwtSignOptions['expiresIn'];
   private readonly refreshExpiresIn: JwtSignOptions['expiresIn'];
   private readonly isProduction: boolean;
+  private readonly refreshCookiePath: string;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -36,6 +37,7 @@ export class AuthService {
       '7d',
     ) as JwtSignOptions['expiresIn'];
     this.isProduction = this.config.get('NODE_ENV') === 'production';
+    this.refreshCookiePath = this.buildRefreshCookiePath();
   }
 
   async validateUser(email: string, password: string) {
@@ -120,9 +122,20 @@ export class AuthService {
       httpOnly: true,
       sameSite: 'lax' as const,
       secure: this.isProduction,
-      path: '/auth',
+      path: this.refreshCookiePath,
       ...(maxAge ? { maxAge } : {}),
     };
+  }
+
+  private buildRefreshCookiePath() {
+    const prefix = this.normalizePathSegment(this.config.get('API_PREFIX', 'api'));
+    const version = this.normalizePathSegment(this.config.get('API_VERSION', 'v1'));
+
+    return `/${[prefix, version, 'auth'].filter(Boolean).join('/')}`;
+  }
+
+  private normalizePathSegment(value: string) {
+    return value.replace(/^\/+|\/+$/g, '');
   }
 
   private parseDurationToMs(value: JwtSignOptions['expiresIn']) {

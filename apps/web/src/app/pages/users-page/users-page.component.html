@@ -48,24 +48,25 @@
   ></app-user-dialog>
 
   @if (loading()) {
-  <div class="table-card loading-card">
-    <i class="pi pi-spinner pi-spin"></i>
-    <span>Loading users...</span>
-  </div>
+    <div class="table-card loading-card">
+      <i class="pi pi-spinner pi-spin"></i>
+      <span>Loading users...</span>
+    </div>
   } @else {
-  <div class="table-card">
-    <app-user-table
-      [users]="users()"
-      [first]="first"
-      [totalRecords]="total()"
-      [pageSize]="pageSize"
-      (view)="openView($event)"
-      (edit)="openEdit($event)"
-      (remove)="handleDelete($event)"
-      (pageChange)="handlePageChange($event)"
-    />
-  </div>
+    <div class="table-card">
+      <app-user-table
+        [users]="users()"
+        [first]="first"
+        [totalRecords]="total()"
+        [pageSize]="pageSize"
+        (view)="openView($event)"
+        (edit)="openEdit($event)"
+        (remove)="handleDelete($event)"
+        (pageChange)="handlePageChange($event)"
+      />
+    </div>
   }
 </div>
 
 <app-confirm-dialog></app-confirm-dialog>
+<p-toast></p-toast>

@@ -3,6 +3,7 @@
 Small full-stack demo with an Angular v21 UI and NestJS API.
 
 This repo is an Nx workspace with:
+
 - Angular app at `apps/web`
 - NestJS API at `api`
 - Shared library at `shared` for types/interfaces/DTOs (imported via `@shared/*`)
@@ -65,7 +66,6 @@ For a portfolio/demo application, the priority is a stable and reproducible stac
 - **State**
   - UI state stored in a service using signals
   - Data fetched from the API via HttpClient
-  - Legacy localStorage persistence kept as commented reference code
   - Loading flag exposed to gate UI while requests are in flight
 - **Styling**
   - SCSS with variables and nesting
@@ -91,6 +91,8 @@ For a portfolio/demo application, the priority is a stable and reproducible stac
 ## Running the project
 
 Defaults are provided in `.env` (tracked); adjust values there if needed.
+
+The tracked `.env` file contains demo-only placeholder values so the project can be cloned and run without extra setup. In a production deployment, secrets such as JWT keys and admin credentials should be provided by the hosting environment or a secret manager, not committed to source control.
 
 Frontend origin for CORS is controlled by `WEB_ORIGIN` in `.env`.
 
@@ -175,8 +177,6 @@ npm run start:all
 ```
 
 The Users page pulls data from the API (`GET /api/v1/users`), so make sure the API is running before opening `/users`.
-
-LocalStorage support is kept in the frontend service as commented legacy code (used before the API was wired).
 
 Build:
 
@@ -264,3 +264,7 @@ You can also inspect the project graph with:
 ```bash
 nx graph
 ```
+
+## Production considerations
+
+This repository is intentionally scoped as a local full-stack demo. A production deployment should add managed secrets, distributed rate limiting, hardened HTTP headers, a production database, and a broader auth/security review.

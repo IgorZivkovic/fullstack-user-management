@@ -29,6 +29,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*path');
   }
 }

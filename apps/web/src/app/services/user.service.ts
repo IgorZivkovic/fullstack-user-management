@@ -21,19 +21,22 @@ type UsersQueryParams = {
   gender?: User['gender'] | 'all';
 };
 
+type UserOperationError = {
+  message: string;
+  occurredAt: number;
+};
+
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private readonly apiBaseUrl = environment.apiBaseUrl;
-  // Legacy localStorage support (used before the API was implemented and wired).
-  // Leave this commented for reference during development.
-  // private readonly storageKey = 'users-data';
   private readonly _users = signal<User[]>([]);
   private readonly _loading = signal<boolean>(true);
   private readonly _total = signal<number>(0);
   private readonly _page = signal<number>(1);
   private readonly _pageSize = signal<number>(10);
+  private readonly _operationError = signal<UserOperationError | null>(null);
   private currentQuery: UsersQueryParams = { page: 1, pageSize: 10 };
 
   readonly users = this._users.asReadonly();
@@ -41,20 +44,9 @@ export class UserService {
   readonly total = this._total.asReadonly();
   readonly page = this._page.asReadonly();
   readonly pageSize = this._pageSize.asReadonly();
+  readonly operationError = this._operationError.asReadonly();
 
-  constructor(private readonly http: HttpClient) {
-    // Legacy localStorage hydrate (used before the API was implemented and wired).
-    // const stored = localStorage.getItem(this.storageKey);
-    // if (stored) {
-    //   try {
-    //     this._users.set(JSON.parse(stored));
-    //   } catch (error) {
-    //     console.error('Failed to parse stored users:', error);
-    //     localStorage.removeItem(this.storageKey);
-    //     this._users.set([]);
-    //   }
-    // }
-  }
+  constructor(private readonly http: HttpClient) {}
 
   add(user: User): void {
     const payload = this.toPayload(user);
@@ -63,6 +55,7 @@ export class UserService {
         this.fetchFromApi();
       },
       error: (error) => {
+        this.setOperationError('Failed to create user.');
         console.error('Failed to create user:', error);
       },
     });
@@ -75,6 +68,7 @@ export class UserService {
         this.fetchFromApi();
       },
       error: (error) => {
+        this.setOperationError('Failed to update user.');
         console.error('Failed to update user:', error);
       },
     });
@@ -86,6 +80,7 @@ export class UserService {
         this.fetchFromApi();
       },
       error: (error) => {
+        this.setOperationError('Failed to delete user.');
         console.error('Failed to delete user:', error);
       },
     });
@@ -106,41 +101,37 @@ export class UserService {
 
     this._loading.set(true);
     this.http
-      .get<UsersResponse | User[]>(`${this.apiBaseUrl}/users`, { params })
+      .get<UsersResponse>(`${this.apiBaseUrl}/users`, { params })
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-      next: (response) => {
-        if (Array.isArray(response)) {
-          this._users.set(response);
-          this._total.set(response.length);
-          this._page.set(1);
-          this._pageSize.set(response.length);
-          return;
-        }
-        this._users.set(response.data);
-        this._total.set(response.pagination.total);
-        this._page.set(response.pagination.page);
-        this._pageSize.set(response.pagination.pageSize);
-        this.currentQuery = {
-          ...this.currentQuery,
-          page: response.pagination.page,
-          pageSize: response.pagination.pageSize,
-        };
-        // this.persist();
-      },
-      error: (error) => {
-        console.error('Failed to fetch users from API:', error);
-      },
-    });
+        next: (response) => {
+          this._users.set(response.data);
+          this._total.set(response.pagination.total);
+          this._page.set(response.pagination.page);
+          this._pageSize.set(response.pagination.pageSize);
+          this.currentQuery = {
+            ...this.currentQuery,
+            page: response.pagination.page,
+            pageSize: response.pagination.pageSize,
+          };
+        },
+        error: (error) => {
+          this.setOperationError('Failed to load users.');
+          console.error('Failed to fetch users from API:', error);
+        },
+      });
   }
 
   private toPayload(user: User): Omit<User, 'id'> {
-    const { id: _id, ...payload } = user;
-    return payload;
+    return {
+      name: user.name,
+      birthday: user.birthday,
+      gender: user.gender,
+      country: user.country,
+    };
   }
 
-  // Legacy localStorage persist (used before the API was implemented and wired).
-  // private persist(): void {
-  //   localStorage.setItem(this.storageKey, JSON.stringify(this._users()));
-  // }
+  private setOperationError(message: string): void {
+    this._operationError.set({ message, occurredAt: Date.now() });
+  }
 }
