@@ -40,6 +40,16 @@ The pages are connected via Angular routing, with `/users` protected by auth.
 - **Security:** Argon2 password hashing, HttpOnly refresh cookie
 - **Tooling:** Nx workspace, TypeScript, Webpack, ESLint, Prettier
 
+## Angular 22 upgrade note
+
+This project intentionally stays on Angular v21 for now instead of moving to Angular v22 immediately.
+
+Angular v22 is available, but the current stable PrimeNG release used by this UI targets Angular v21. Nx has Angular v22 support merged upstream, but at the time of this update it is available through the `next`/beta release line rather than the stable `latest` release.
+
+There is also a licensing consideration. Existing PrimeNG v21 releases remain MIT licensed, but PrimeNG v22 is planned under the new PrimeUI license model instead of the previous open-source MIT model.
+
+For a portfolio/demo application, the priority is a stable and reproducible stack without peer dependency conflicts or licensing ambiguity. The likely future upgrade path is to move to Angular v22+ together with a migration to a different UI component library once the replacement is selected.
+
 ## Technical Details
 
 - **Angular v21**
