@@ -16,12 +16,12 @@
       <label>Name</label>
       <input pInputText formControlName="name" />
       @if (form.controls.name.touched && form.controls.name.invalid) {
-      <small class="error" *ngIf="form.controls.name.hasError('required')">
-        Name is required.
-      </small>
-      <small class="error" *ngIf="form.controls.name.hasError('minlength')">
-        Name must be at least 2 characters.
-      </small>
+        <small class="error" *ngIf="form.controls.name.hasError('required')">
+          Name is required.
+        </small>
+        <small class="error" *ngIf="form.controls.name.hasError('minlength')">
+          Name must be at least 2 characters.
+        </small>
       }
     </div>
 
@@ -29,7 +29,7 @@
       <label>Birthday</label>
       <p-datepicker formControlName="birthday" [showIcon]="true" appendTo="body"></p-datepicker>
       @if (form.controls.birthday.touched && form.controls.birthday.invalid) {
-      <small class="error">Birthday is required.</small>
+        <small class="error">Birthday is required.</small>
       }
     </div>
 
@@ -48,12 +48,12 @@
       <label>Country</label>
       <input pInputText formControlName="country" />
       @if (form.controls.country.touched && form.controls.country.invalid) {
-      <small class="error" *ngIf="form.controls.country.hasError('required')">
-        Country is required.
-      </small>
-      <small class="error" *ngIf="form.controls.country.hasError('minlength')">
-        Country must be at least 2 characters.
-      </small>
+        <small class="error" *ngIf="form.controls.country.hasError('required')">
+          Country is required.
+        </small>
+        <small class="error" *ngIf="form.controls.country.hasError('minlength')">
+          Country must be at least 2 characters.
+        </small>
       }
     </div>
   </form>
@@ -62,7 +62,11 @@
     <p-button label="Cancel" severity="secondary" (onClick)="onHide()"></p-button>
 
     @if (mode() !== 'view') {
-    <p-button label="Save" [disabled]="form.invalid" (onClick)="onSave()"></p-button>
+      <p-button
+        label="Save"
+        [disabled]="form.invalid || form.disabled"
+        (onClick)="onSave()"
+      ></p-button>
     }
   </ng-template>
 </p-dialog>

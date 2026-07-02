@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { finalize } from 'rxjs';
+import { catchError, finalize, tap, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
@@ -48,30 +48,32 @@ export class UserService {
 
   constructor(private readonly http: HttpClient) {}
 
-  add(user: User): void {
+  add(user: User) {
     const payload = this.toPayload(user);
-    this.http.post<User>(`${this.apiBaseUrl}/users`, payload).subscribe({
-      next: () => {
+    return this.http.post<User>(`${this.apiBaseUrl}/users`, payload).pipe(
+      tap(() => {
         this.fetchFromApi();
-      },
-      error: (error) => {
+      }),
+      catchError((error) => {
         this.setOperationError('Failed to create user.');
         console.error('Failed to create user:', error);
-      },
-    });
+        return throwError(() => error);
+      }),
+    );
   }
 
-  update(user: User): void {
+  update(user: User) {
     const payload = this.toPayload(user);
-    this.http.put<User>(`${this.apiBaseUrl}/users/${user.id}`, payload).subscribe({
-      next: () => {
+    return this.http.put<User>(`${this.apiBaseUrl}/users/${user.id}`, payload).pipe(
+      tap(() => {
         this.fetchFromApi();
-      },
-      error: (error) => {
+      }),
+      catchError((error) => {
         this.setOperationError('Failed to update user.');
         console.error('Failed to update user:', error);
-      },
-    });
+        return throwError(() => error);
+      }),
+    );
   }
 
   remove(id: number): void {

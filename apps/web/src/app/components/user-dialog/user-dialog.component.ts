@@ -83,13 +83,16 @@ export class UserDialogComponent {
       });
     }
 
-    if (mode === 'view') {
-      this.form.disable();
-    } else {
-      this.form.enable();
+    this.applyModeState(mode);
+  }
 
-      this.form.controls.id.disable();
+  setSaving(isSaving: boolean): void {
+    if (isSaving) {
+      this.form.disable();
+      return;
     }
+
+    this.applyModeState();
   }
 
   onHide(): void {
@@ -132,5 +135,15 @@ export class UserDialogComponent {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private applyModeState(mode: UserDialogMode = this.mode()): void {
+    if (mode === 'view') {
+      this.form.disable();
+      return;
+    }
+
+    this.form.enable();
+    this.form.controls.id.disable();
   }
 }

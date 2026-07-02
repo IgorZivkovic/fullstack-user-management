@@ -2,7 +2,7 @@ import { Component, DestroyRef, ViewChild, effect, inject, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
 import { ButtonModule } from 'primeng/button';
@@ -117,13 +117,23 @@ export class UsersPageComponent {
   }
 
   handleSave(user: User): void {
-    if (this.dialogMode() === 'edit') {
-      this.userService.update(user);
-    } else {
-      this.userService.add(user);
-    }
+    const request =
+      this.dialogMode() === 'edit' ? this.userService.update(user) : this.userService.add(user);
 
-    this.dialogVisible.set(false);
+    this.dialogComponent?.setSaving(true);
+    request
+      .pipe(
+        finalize(() => this.dialogComponent?.setSaving(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.dialogVisible.set(false);
+        },
+        error: () => {
+          // UserService surfaces the error through operationError; keep the dialog open.
+        },
+      });
   }
 
   handleDelete(user: User): void {
