@@ -3,13 +3,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import {
+  TuiButton,
+  TuiInput,
+  TuiLoader,
+  TuiNotificationService,
+  TuiTextfield,
+} from '@taiga-ui/core';
+import { TuiSelect } from '@taiga-ui/kit';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
-import { ButtonModule } from 'primeng/button';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
-import { ToastModule } from 'primeng/toast';
 import {
   UserDialogComponent,
   UserDialogMode,
@@ -23,25 +26,24 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     FormsModule,
-    ButtonModule,
     RouterLink,
-    InputTextModule,
-    SelectModule,
-    ToastModule,
+    TuiButton,
+    TuiInput,
+    TuiLoader,
+    TuiSelect,
+    TuiTextfield,
     UserTableComponent,
     UserDialogComponent,
     ConfirmDialogComponent,
   ],
   templateUrl: './users-page.component.html',
   styleUrl: './users-page.component.scss',
-  providers: [ConfirmationService, MessageService],
 })
 export class UsersPageComponent {
   @ViewChild(UserDialogComponent) dialogComponent?: UserDialogComponent;
 
   private readonly userService = inject(UserService);
-  private readonly confirmationService = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly notifications = inject(TuiNotificationService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -53,6 +55,9 @@ export class UsersPageComponent {
   readonly dialogVisible = signal(false);
   readonly dialogMode = signal<UserDialogMode>('add');
   readonly selectedUser = signal<User | null>(null);
+  readonly savingUser = signal(false);
+  readonly confirmDeleteVisible = signal(false);
+  readonly userPendingDelete = signal<User | null>(null);
 
   searchTerm = '';
   genderFilter: Gender | 'all' = 'all';
@@ -65,6 +70,8 @@ export class UsersPageComponent {
     { label: 'Female', value: 'female' },
     { label: 'Other', value: 'other' },
   ];
+  readonly genderValues = this.genderOptions.map((option) => option.value);
+  readonly genderLabels = this.genderOptions.map((option) => option.label);
 
   constructor() {
     this.searchChanges
@@ -81,11 +88,12 @@ export class UsersPageComponent {
         return;
       }
 
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Request failed',
-        detail: error.message,
-      });
+      this.notifications
+        .open(error.message, {
+          label: 'Operation failed',
+          appearance: 'negative',
+        })
+        .subscribe();
     });
 
     this.loadUsers();
@@ -120,10 +128,10 @@ export class UsersPageComponent {
     const request =
       this.dialogMode() === 'edit' ? this.userService.update(user) : this.userService.add(user);
 
-    this.dialogComponent?.setSaving(true);
+    this.savingUser.set(true);
     request
       .pipe(
-        finalize(() => this.dialogComponent?.setSaving(false)),
+        finalize(() => this.savingUser.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
@@ -137,24 +145,31 @@ export class UsersPageComponent {
   }
 
   handleDelete(user: User): void {
-    this.confirmationService.confirm({
-      header: 'Confirm Delete',
-      message: `Delete ${user.name}?`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Yes, delete',
-      rejectLabel: 'Cancel',
-      acceptButtonStyleClass: 'p-button-danger',
-      rejectButtonStyleClass: 'p-button-text',
-      accept: () => {
-        this.userService.remove(user.id);
+    this.userPendingDelete.set(user);
+    this.confirmDeleteVisible.set(true);
+  }
 
-        if (this.selectedUser()?.id === user.id) {
-          this.handleClose();
-          this.selectedUser.set(null);
-          this.dialogMode.set('add');
-        }
-      },
-    });
+  cancelDelete(): void {
+    this.confirmDeleteVisible.set(false);
+    this.userPendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const user = this.userPendingDelete();
+
+    if (!user) {
+      return;
+    }
+
+    this.userService.remove(user.id);
+
+    if (this.selectedUser()?.id === user.id) {
+      this.handleClose();
+      this.selectedUser.set(null);
+      this.dialogMode.set('add');
+    }
+
+    this.cancelDelete();
   }
 
   handleLogout(): void {

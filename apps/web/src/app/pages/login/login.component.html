@@ -1,37 +1,42 @@
 <section class="login-page">
-  <div class="login-card">
-    <a routerLink="/" class="login-card__back">&larr; Back to home</a>
-    <h1>Sign in</h1>
-    <p class="login-card__subtitle">Use your admin credentials to access the dashboard.</p>
+  <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+    <header class="login-card__header">
+      <h1>Sign in</h1>
+      <p>Use your admin credentials to access the dashboard.</p>
+    </header>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <div class="form-field">
-        <label for="email">Email</label>
-        <input id="email" type="email" pInputText formControlName="email" autocomplete="email" />
-        @if (form.controls.email.touched && form.controls.email.invalid) {
-          <span class="field-error">Enter a valid email address.</span>
-        }
-      </div>
+    <div class="form-field">
+      <tui-textfield>
+        <label tuiLabel>Email</label>
+        <input id="email" type="email" tuiInput formControlName="email" autocomplete="email" />
+      </tui-textfield>
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <p class="field-error">Enter a valid email address.</p>
+      }
+    </div>
 
-      <div class="form-field">
-        <label for="password">Password</label>
+    <div class="form-field">
+      <tui-textfield>
+        <label tuiLabel>Password</label>
         <input
           id="password"
           type="password"
-          pInputText
+          tuiInput
           formControlName="password"
           autocomplete="current-password"
         />
-        @if (form.controls.password.touched && form.controls.password.invalid) {
-          <span class="field-error">Password must be at least 6 characters.</span>
-        }
-      </div>
-
-      @if (errorMessage()) {
-        <div class="form-error">{{ errorMessage() }}</div>
+      </tui-textfield>
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <p class="field-error">Password must be at least 6 characters.</p>
       }
+    </div>
 
-      <button pButton type="submit" label="Sign in" [disabled]="submitting()"></button>
-    </form>
-  </div>
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+
+    <button tuiButton size="l" type="submit" [disabled]="submitting()">Sign in</button>
+
+    <a routerLink="/" class="login-card__link">Back to home</a>
+  </form>
 </section>

@@ -1,59 +1,75 @@
-<div class="page">
-  <header class="users-header">
-    <div class="header-info">
-      <h2>Users</h2>
-      <p class="subtitle">Add, edit, view, and delete users via modal.</p>
-      <a routerLink="/" class="back-link">
-        <i class="pi pi-arrow-left"></i>
-        Back to Landing Page
-      </a>
+<header class="page-toolbar">
+  <div class="toolbar-content">
+    <div class="toolbar-copy">
+      <span class="toolbar-title">Users</span>
+      <span class="toolbar-subtitle">Add, edit, view, and delete users via modal.</span>
     </div>
 
-    <div class="actions-bar">
-      <p-button label="Add User" icon="pi pi-plus" (onClick)="openAdd()" />
-      <p-button label="Logout" icon="pi pi-sign-out" (onClick)="handleLogout()" />
-    </div>
-  </header>
+    <span class="toolbar-spacer"></span>
 
-  <div class="filters-card">
+    <button tuiButton size="s" type="button" (click)="openAdd()">Add User</button>
+    <button tuiButton size="s" appearance="outline" type="button" (click)="handleLogout()">
+      Logout
+    </button>
+  </div>
+</header>
+
+<main class="page">
+  <a routerLink="/" class="back-link">
+    <span aria-hidden="true">&larr;</span>
+    Back to Landing Page
+  </a>
+
+  <section class="filters-card" aria-label="User filters">
     <div class="filters-row">
-      <span class="p-input-icon-left filter-field">
-        <i class="pi pi-search"></i>
+      <tui-textfield class="filter-field">
+        <label tuiLabel>Search by name or country</label>
         <input
-          pInputText
+          tuiInput
           type="text"
-          placeholder="Search by name or country"
           [ngModel]="searchTerm"
           (ngModelChange)="handleSearchChange($event)"
         />
-      </span>
-      <p-select
-        [options]="genderOptions"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="genderFilter"
-        (onChange)="handleGenderChange($event.value)"
-        placeholder="Gender"
-        styleClass="filter-field filters-select"
-      ></p-select>
+      </tui-textfield>
+
+      <tui-textfield class="filter-field">
+        <label tuiLabel>Gender</label>
+        <select
+          tuiSelect
+          [items]="genderValues"
+          [labels]="genderLabels"
+          [ngModel]="genderFilter"
+          (ngModelChange)="handleGenderChange($event)"
+        ></select>
+      </tui-textfield>
     </div>
-  </div>
+  </section>
 
   <app-user-dialog
     [visible]="dialogVisible()"
     [mode]="dialogMode()"
     [user]="selectedUser()"
+    [saving]="savingUser()"
     (close)="handleClose()"
     (save)="handleSave($event)"
   ></app-user-dialog>
 
-  @if (loading()) {
-    <div class="table-card loading-card">
-      <i class="pi pi-spinner pi-spin"></i>
-      <span>Loading users...</span>
-    </div>
-  } @else {
-    <div class="table-card">
+  <app-confirm-dialog
+    [visible]="confirmDeleteVisible()"
+    title="Confirm delete"
+    confirmLabel="Delete"
+    [message]="'Delete ' + (userPendingDelete()?.name ?? 'this user') + '?'"
+    (cancel)="cancelDelete()"
+    (confirm)="confirmDelete()"
+  />
+
+  <section class="table-card">
+    @if (loading()) {
+      <div class="loading-card">
+        <tui-loader size="m" />
+        <span>Loading users...</span>
+      </div>
+    } @else {
       <app-user-table
         [users]="users()"
         [first]="first"
@@ -64,9 +80,6 @@
         (remove)="handleDelete($event)"
         (pageChange)="handlePageChange($event)"
       />
-    </div>
-  }
-</div>
-
-<app-confirm-dialog></app-confirm-dialog>
-<p-toast></p-toast>
+    }
+  </section>
+</main>

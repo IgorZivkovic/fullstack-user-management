@@ -1,28 +1,88 @@
-
-.actions-cell {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
+.table-scroll {
+  overflow-x: auto;
 }
 
 .users-table {
-  table-layout: fixed;
+  min-width: 760px;
   width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
-.users-table th,
-.users-table td {
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+th,
+td {
+  border-bottom: 1px solid #e4e9f2;
+  padding: 0 1rem;
+  text-align: left;
+  white-space: nowrap;
 }
 
-.users-table .actions-cell {
-  white-space: normal;
-  justify-content: center;
+th {
+  height: 52px;
+  background: #f8fbff;
+  font-weight: 600;
+  color: #2c3447;
 }
 
-.center-cell {
+td {
+  height: 56px;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  width: 8%;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 23%;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 18%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 13%;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+  width: 18%;
+}
+
+th:nth-child(6),
+td:nth-child(6) {
+  width: 140px;
   text-align: center;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.danger-action {
+  color: var(--app-danger);
+}
+
+.empty-cell {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--app-muted);
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  color: var(--app-muted);
+  font-size: 0.9rem;
 }

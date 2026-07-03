@@ -1,59 +1,71 @@
-<p-table
-  [value]="users"
-  [lazy]="true"
-  [paginator]="true"
-  [first]="first"
-  [rows]="pageSize"
-  [totalRecords]="totalRecords"
-  (onPage)="pageChange.emit({ first: $event.first, rows: $event.rows })"
-  dataKey="id"
-  responsiveLayout="stack"
-  breakpoint="640px"
-  tableStyleClass="users-table"
->
-  <ng-template pTemplate="header">
-    <tr>
-      <th class="center-cell">ID</th>
-      <th class="center-cell">Name</th>
-      <th class="center-cell">Birthday</th>
-      <th class="center-cell">Gender</th>
-      <th class="center-cell">Country</th>
-      <th class="center-cell">Actions</th>
-    </tr>
-  </ng-template>
-  <ng-template pTemplate="body" let-user>
-    <tr>
-      <td class="center-cell">{{ user.id }}</td>
-      <td class="center-cell">{{ user.name }}</td>
-      <td class="center-cell">{{ user.birthday | date: 'MMM d, y' }}</td>
-      <td class="center-cell">{{ user.gender }}</td>
-      <td class="center-cell">{{ user.country }}</td>
-      <td class="actions-cell center-cell">
-        <p-button
-          label="View"
-          icon="pi pi-eye"
-          size="small"
-          (onClick)="view.emit(user)"
-        ></p-button>
-        <p-button
-          label="Edit"
-          icon="pi pi-pencil"
-          size="small"
-          (onClick)="edit.emit(user)"
-        ></p-button>
-        <p-button
-          label="Delete"
-          icon="pi pi-trash"
-          severity="danger"
-          size="small"
-          (onClick)="remove.emit(user)"
-        ></p-button>
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td colspan="6">No users yet. Click "Add User" to create one.</td>
-    </tr>
-  </ng-template>
-</p-table>
+<div class="table-scroll">
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Birthday</th>
+        <th scope="col">Gender</th>
+        <th scope="col">Country</th>
+        <th scope="col" class="actions-heading">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of users; track user.id) {
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.birthday | date: 'MMM d, y' }}</td>
+          <td>{{ user.gender }}</td>
+          <td>{{ user.country }}</td>
+          <td>
+            <div class="actions-cell">
+              <button
+                tuiIconButton
+                appearance="flat"
+                size="s"
+                iconStart="@tui.eye"
+                type="button"
+                aria-label="View user"
+                (click)="view.emit(user)"
+              ></button>
+              <button
+                tuiIconButton
+                appearance="flat"
+                size="s"
+                iconStart="@tui.code"
+                type="button"
+                aria-label="Edit user"
+                (click)="edit.emit(user)"
+              ></button>
+              <button
+                tuiIconButton
+                appearance="flat"
+                size="s"
+                iconStart="@tui.trash"
+                class="danger-action"
+                type="button"
+                aria-label="Delete user"
+                (click)="remove.emit(user)"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty-cell" colspan="6">No users yet. Click "Add User" to create one.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<footer class="table-footer">
+  <span>{{ pageStart }} - {{ pageEnd }} of {{ totalRecords }}</span>
+  <tui-pagination
+    size="m"
+    [length]="pageCount"
+    [index]="pageIndex"
+    (indexChange)="handlePageIndexChange($event)"
+  />
+</footer>

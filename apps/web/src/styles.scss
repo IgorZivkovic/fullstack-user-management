@@ -1,10 +1,37 @@
-@import '../../../node_modules/primeicons/primeicons.css';
-
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: light;
+  --app-font-family: var(--tui-font-text, 'Inter', 'Segoe UI', Arial, sans-serif);
+  --app-page-bg: #f4f7fb;
+  --app-card-bg: #ffffff;
+  --app-border: #d7deea;
+  --app-text: #172033;
+  --app-muted: #667085;
+  --app-primary: #006adc;
+  --app-danger: #d92d20;
+}
 
 html,
 body {
   height: 100%;
   margin: 0;
-  background: #f8fafc;
+  background: var(--app-page-bg);
+  font-family: var(--app-font-family);
+  color: var(--app-text);
+}
+
+app-root,
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+input:is(:-webkit-autofill, :autofill) {
+  -webkit-text-fill-color: var(--app-text);
+  box-shadow: 0 0 0 1000px var(--app-card-bg) inset;
+}
+
+tui-popups {
+  z-index: 1200;
 }

@@ -3,14 +3,13 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
+import { TuiButton, TuiInput, TuiTextfield } from '@taiga-ui/core';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonModule, InputTextModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TuiButton, TuiInput, TuiTextfield],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

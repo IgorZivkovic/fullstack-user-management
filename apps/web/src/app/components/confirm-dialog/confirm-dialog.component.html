@@ -1,1 +1,23 @@
-<p-confirmDialog [closable]="false"></p-confirmDialog>
+@if (visible()) {
+  <div class="confirm-backdrop" (click)="cancel.emit()">
+    <section
+      class="confirm-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title()"
+      (click)="$event.stopPropagation()"
+    >
+      <h2>{{ title() }}</h2>
+      <p>{{ message() }}</p>
+
+      <div class="confirm-actions">
+        <button tuiButton size="s" appearance="outline" type="button" (click)="cancel.emit()">
+          {{ cancelLabel() }}
+        </button>
+        <button tuiButton size="s" appearance="negative" type="button" (click)="confirm.emit()">
+          {{ confirmLabel() }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

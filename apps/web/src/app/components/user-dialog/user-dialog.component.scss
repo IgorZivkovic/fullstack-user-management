@@ -1,21 +1,52 @@
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.dialog-panel {
+  width: min(95vw, 480px);
+  max-height: min(90vh, 720px);
+  overflow: visible;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 1rem;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+  padding: 1.25rem;
+}
+
+.dialog-header {
+  h2 {
+    margin: 0 0 1rem;
+    color: var(--app-text);
+    font-size: 1.35rem;
+  }
+}
+
 .form {
   display: grid;
   gap: 1rem;
-  min-width: 280px;
   width: 100%;
 }
 
-.field {
+.form-field {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
-.error {
-  color: #b91c1c;
+.field-error {
+  margin: 0;
+  color: var(--app-danger);
   font-size: 0.85rem;
 }
 
-.user-dialog {
-  width: 480px;
-  max-width: 95vw;
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }

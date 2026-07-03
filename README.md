@@ -35,7 +35,7 @@ The pages are connected via Angular routing, with `/users` protected by auth.
 
 ## Tech Stack
 
-- **Frontend:** Angular v21, RxJS, PrimeNG, PrimeIcons, SCSS
+- **Frontend:** Angular v21, RxJS, Taiga UI, SCSS
 - **Backend:** NestJS v11, Passport + JWT (local/jwt strategies), Swagger, class-validator/transformer
 - **Data:** Drizzle ORM, SQLite (better-sqlite3)
 - **Security:** Argon2 password hashing, HttpOnly refresh cookie
@@ -45,11 +45,11 @@ The pages are connected via Angular routing, with `/users` protected by auth.
 
 This project intentionally stays on Angular v21 for now instead of moving to Angular v22 immediately.
 
-Angular v22 is available, but the current stable PrimeNG release used by this UI targets Angular v21. Nx has Angular v22 support merged upstream, but at the time of this update it is available through the `next`/beta release line rather than the stable `latest` release.
+Angular v22 is available, and the UI has been migrated from PrimeNG to Taiga UI to avoid the PrimeNG v22 compatibility/licensing ambiguity in this demo stack. The remaining upgrade decision is to move the whole Nx workspace to Angular v22 in one coordinated dependency update rather than mixing framework majors across the repo.
 
-There is also a licensing consideration. Existing PrimeNG v21 releases remain MIT licensed, but PrimeNG v22 is planned under the new PrimeUI license model instead of the previous open-source MIT model.
+There was also a licensing consideration in the previous UI stack. Existing PrimeNG v21 releases remain MIT licensed, but PrimeNG v22 moved under the new PrimeUI dual Community/Commercial model instead of the previous open-source MIT model.
 
-For a portfolio/demo application, the priority is a stable and reproducible stack without peer dependency conflicts or licensing ambiguity. The likely future upgrade path is to move to Angular v22+ together with a migration to a different UI component library once the replacement is selected.
+For a portfolio/demo application, the priority is a stable and reproducible stack without peer dependency conflicts or licensing ambiguity. The UI library migration has already been completed; the future upgrade path is a focused Angular/Nx v22+ migration.
 
 ## Technical Details
 
@@ -60,9 +60,8 @@ For a portfolio/demo application, the priority is a stable and reproducible stac
   - Reactive forms
   - New Angular control flow syntax
 - **UI**
-  - PrimeNG components (table, dialog, buttons, confirm dialog)
-  - PrimeIcons for icons (no global PrimeNG theme applied)
-  - Reusable standalone confirm dialog component
+  - Taiga UI components for forms, buttons, pagination, notifications, and date inputs
+  - Reusable standalone user and confirmation dialog components
 - **State**
   - UI state stored in a service using signals
   - Data fetched from the API via HttpClient
