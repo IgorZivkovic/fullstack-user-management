@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListUsersRequest;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    private const USER_FIELDS = ['name', 'birthday', 'gender', 'country'];
-
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(ListUsersRequest $request): AnonymousResourceCollection
     {
-        $perPage = min(100, max(1, $request->integer('per_page', 10)));
-        $search = trim($request->string('search')->toString());
-        $gender = trim($request->string('gender')->toString());
+        $filters = $request->validated();
+        $perPage = (int) ($filters['per_page'] ?? 10);
+        $search = trim($filters['search'] ?? '');
+        $gender = $filters['gender'] ?? null;
 
         $users = User::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
@@ -28,7 +29,7 @@ class UserController extends Controller
                         ->orWhereLike('country', "%{$search}%");
                 });
             })
-            ->when($gender !== '', fn (Builder $query) => $query->where('gender', $gender))
+            ->when($gender !== null, fn (Builder $query) => $query->where('gender', $gender))
             ->orderBy('id')
             ->paginate($perPage)
             ->withQueryString();
@@ -41,18 +42,18 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = User::query()->create($request->only(self::USER_FIELDS));
+        $user = User::query()->create($request->validated());
 
         return (new UserResource($user))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function update(Request $request, User $user): UserResource
+    public function update(UpdateUserRequest $request, User $user): UserResource
     {
-        $user->update($request->only(self::USER_FIELDS));
+        $user->update($request->validated());
 
         return new UserResource($user->refresh());
     }
