@@ -4,6 +4,8 @@ use App\Models\AuthUser;
 
 return [
 
+    'login_rate_limit' => max(1, (int) env('AUTH_RATE_LIMIT_MAX', 10)),
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
