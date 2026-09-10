@@ -10,5 +10,5 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         'timestamp' => now()->toISOString(),
     ]))->name('health');
 
-    Route::apiResource('users', UserController::class)->only(['index', 'show']);
+    Route::apiResource('users', UserController::class);
 });
