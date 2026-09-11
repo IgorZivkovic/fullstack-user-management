@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Gender;
+use App\Models\AuthUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,13 @@ use Tests\TestCase;
 class ManageUsersTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(AuthUser::factory()->admin()->create());
+    }
 
     public function test_a_user_can_be_created(): void
     {

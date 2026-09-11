@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Gender;
+use App\Models\AuthUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,13 @@ use Tests\TestCase;
 class ReadUsersTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(AuthUser::factory()->create());
+    }
 
     public function test_users_are_paginated_in_id_order_with_laravel_metadata(): void
     {

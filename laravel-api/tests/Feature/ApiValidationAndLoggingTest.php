@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuthUser;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,13 @@ use Tests\TestCase;
 class ApiValidationAndLoggingTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(AuthUser::factory()->admin()->create());
+    }
 
     public function test_create_validation_errors_use_the_api_error_envelope(): void
     {
