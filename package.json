@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "nx serve web",
-    "start:api": "cd laravel-api && php artisan serve --host=127.0.0.1 --port=8000",
+    "start:api": "cd api && php artisan serve --host=127.0.0.1 --port=8000",
     "start:all": "concurrently --kill-others-on-fail --names web,api \"npm run start\" \"npm run start:api\"",
     "start:full": "npm run db:migrate && npm run start:all",
     "build": "nx build web",
@@ -12,10 +12,10 @@
     "watch": "nx build web --watch --configuration development",
     "test": "npm run test:web && npm run test:api",
     "test:web": "nx test web",
-    "test:api": "cd laravel-api && php artisan test",
-    "db:migrate": "cd laravel-api && php artisan migrate",
-    "db:seed": "cd laravel-api && php artisan db:seed",
-    "db:fresh": "cd laravel-api && php artisan migrate:fresh --seed"
+    "test:api": "cd api && php artisan test",
+    "db:migrate": "cd api && php artisan migrate",
+    "db:seed": "cd api && php artisan db:seed",
+    "db:fresh": "cd api && php artisan migrate:fresh --seed"
   },
   "prettier": {
     "printWidth": 100,
