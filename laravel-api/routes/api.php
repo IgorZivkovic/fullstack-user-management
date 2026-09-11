@@ -8,6 +8,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    /**
+     * Check API health.
+     *
+     * Returns the current service status and server timestamp.
+     *
+     * @response array{status: 'ok', timestamp: string}
+     */
     Route::get('/health', static fn (): JsonResponse => response()->json([
         'status' => 'ok',
         'timestamp' => now()->toISOString(),

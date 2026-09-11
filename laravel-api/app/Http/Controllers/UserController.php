@@ -14,6 +14,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    /**
+     * List users.
+     *
+     * Returns Laravel pagination metadata. Results can be searched by name or country and filtered by gender.
+     */
     public function index(ListUsersRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
@@ -37,11 +42,19 @@ class UserController extends Controller
         return UserResource::collection($users);
     }
 
+    /**
+     * Get a user.
+     */
     public function show(User $user): UserResource
     {
         return new UserResource($user);
     }
 
+    /**
+     * Create a user.
+     *
+     * Requires an administrator account.
+     */
     public function store(StoreUserRequest $request): JsonResponse
     {
         $user = User::query()->create($request->validated());
@@ -51,6 +64,11 @@ class UserController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    /**
+     * Update a user.
+     *
+     * Requires an administrator account. Only supplied fields are changed.
+     */
     public function update(UpdateUserRequest $request, User $user): UserResource
     {
         $user->update($request->validated());
@@ -58,6 +76,11 @@ class UserController extends Controller
         return new UserResource($user->refresh());
     }
 
+    /**
+     * Delete a user.
+     *
+     * Requires an administrator account.
+     */
     public function destroy(User $user): JsonResponse
     {
         $user->delete();

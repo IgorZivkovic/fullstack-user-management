@@ -13,6 +13,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
+    /**
+     * Log in.
+     *
+     * Validates the demo account credentials and starts a stateful Sanctum session.
+     */
     public function login(LoginRequest $request): AuthUserResource|JsonResponse
     {
         if (! Auth::guard('web')->attempt($request->validated())) {
@@ -32,6 +37,11 @@ class AuthController extends Controller
         return new AuthUserResource($user);
     }
 
+    /**
+     * Log out.
+     *
+     * Ends the current session and rotates its CSRF token.
+     */
     public function logout(Request $request): JsonResponse
     {
         Auth::guard('web')->logout();
@@ -42,6 +52,9 @@ class AuthController extends Controller
         return response()->json(['loggedOut' => true]);
     }
 
+    /**
+     * Get the authenticated account.
+     */
     public function me(Request $request): AuthUserResource
     {
         /** @var AuthUser $user */
