@@ -1,11 +1,17 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, of, tap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, switchMap, tap, throwError } from 'rxjs';
 import type { AuthRole } from '@shared';
 import { environment } from '../../environments/environment';
 
-type AccessTokenResponse = {
-  accessToken: string;
+export type AuthUser = {
+  id: number;
+  email: string;
+  role: AuthRole;
+};
+
+type AuthUserResponse = {
+  data: AuthUser;
 };
 
 type LoginPayload = {
@@ -13,103 +19,83 @@ type LoginPayload = {
   password: string;
 };
 
-type AccessTokenPayload = {
-  exp?: number;
-  role?: AuthRole;
-};
-
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly apiBaseUrl = environment.apiBaseUrl;
-  private readonly _accessToken = signal<string | null>(null);
-  private readonly _currentRole = signal<AuthRole | null>(null);
+  private readonly csrfUrl = '/sanctum/csrf-cookie';
+  private readonly _currentUser = signal<AuthUser | null>(null);
 
-  readonly accessToken = this._accessToken.asReadonly();
-  readonly currentRole = this._currentRole.asReadonly();
-  readonly canManageUsers = computed(() => this._currentRole() === 'admin');
+  readonly currentUser = this._currentUser.asReadonly();
+  readonly currentRole = computed(() => this._currentUser()?.role ?? null);
+  readonly isAuthenticated = computed(() => this._currentUser() !== null);
+  readonly canManageUsers = computed(() => this.currentRole() === 'admin');
 
   constructor(private readonly http: HttpClient) {}
 
+  login(payload: LoginPayload): Observable<void> {
+    return this.http.get<void>(this.csrfUrl, { withCredentials: true }).pipe(
+      switchMap(() =>
+        this.http.post<AuthUserResponse>(`${this.apiBaseUrl}/auth/login`, payload, {
+          withCredentials: true,
+        }),
+      ),
+      switchMap(() => this.fetchCurrentUser()),
+      map(() => undefined),
+      catchError((error) => {
+        this.clearCurrentUser();
+        return throwError(() => error);
+      }),
+    );
+  }
+
+  loadCurrentUser(): Observable<AuthUser | null> {
+    return this.fetchCurrentUser().pipe(
+      catchError(() => {
+        this.clearCurrentUser();
+        return of(null);
+      }),
+    );
+  }
+
+  logout(): Observable<void> {
+    return this.http.post(`${this.apiBaseUrl}/auth/logout`, {}, { withCredentials: true }).pipe(
+      map(() => undefined),
+      catchError(() => of(undefined)),
+      finalize(() => this.clearCurrentUser()),
+    );
+  }
+
+  clearCurrentUser(): void {
+    this._currentUser.set(null);
+  }
+
+  /**
+   * Temporary compatibility methods until the guard and interceptor switch to session semantics.
+   */
   hasValidAccessToken(): boolean {
-    const token = this._accessToken();
-    if (!token) {
-      return false;
-    }
-    const payload = this.decodeJwt(token);
-    if (!payload) {
-      return false;
-    }
-    if (!payload.exp) {
-      return true;
-    }
-    return Date.now() < payload.exp * 1000;
+    return this.isAuthenticated();
   }
 
   getAccessToken(): string | null {
-    return this._accessToken();
+    return null;
   }
 
   clearAccessToken(): void {
-    this._accessToken.set(null);
-    this._currentRole.set(null);
+    this.clearCurrentUser();
   }
 
-  login(payload: LoginPayload) {
+  refreshAccessToken(): Observable<string | null> {
+    return this.loadCurrentUser().pipe(map((user) => (user ? 'session' : null)));
+  }
+
+  private fetchCurrentUser(): Observable<AuthUser> {
     return this.http
-      .post<AccessTokenResponse>(`${this.apiBaseUrl}/auth/login`, payload, {
-        withCredentials: true,
-      })
+      .get<AuthUserResponse>(`${this.apiBaseUrl}/auth/me`, { withCredentials: true })
       .pipe(
-        tap((response) => this.setAccessToken(response.accessToken)),
-        map(() => undefined),
+        map((response) => response.data),
+        tap((user) => this._currentUser.set(user)),
       );
-  }
-
-  refreshAccessToken() {
-    return this.http
-      .post<AccessTokenResponse>(`${this.apiBaseUrl}/auth/refresh`, {}, { withCredentials: true })
-      .pipe(
-        tap((response) => this.setAccessToken(response.accessToken)),
-        map((response) => response.accessToken),
-        catchError(() => {
-          this.clearAccessToken();
-          return of(null);
-        }),
-      );
-  }
-
-  logout() {
-    return this.http
-      .post(`${this.apiBaseUrl}/auth/logout`, {}, { withCredentials: true })
-      .pipe(
-        tap(() => this.clearAccessToken()),
-        map(() => undefined),
-        catchError(() => {
-          this.clearAccessToken();
-          return of(undefined);
-        }),
-      );
-  }
-
-  private setAccessToken(token: string): void {
-    this._accessToken.set(token);
-    const role = this.decodeJwt(token)?.role;
-    this._currentRole.set(role === 'admin' || role === 'user' ? role : null);
-  }
-
-  private decodeJwt(token: string): AccessTokenPayload | null {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      return null;
-    }
-    try {
-      const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const decoded = atob(payload.padEnd(Math.ceil(payload.length / 4) * 4, '='));
-      return JSON.parse(decoded) as AccessTokenPayload;
-    } catch {
-      return null;
-    }
   }
 }

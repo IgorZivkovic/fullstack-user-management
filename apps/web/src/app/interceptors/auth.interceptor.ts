@@ -12,15 +12,19 @@ import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  constructor(private readonly authService: AuthService, private readonly router: Router) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getAccessToken();
-    const authRequest = token && !this.isAuthEndpoint(request.url)
-      ? request.clone({
-          setHeaders: { Authorization: `Bearer ${token}` },
-        })
-      : request;
+    const authRequest =
+      token && !this.isAuthEndpoint(request.url)
+        ? request.clone({
+            setHeaders: { Authorization: `Bearer ${token}` },
+          })
+        : request;
 
     return next.handle(authRequest).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -49,7 +53,12 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private isAuthEndpoint(url: string) {
-    return url.includes('/auth/login') || url.includes('/auth/refresh') || url.includes('/auth/logout');
+    return (
+      url.includes('/auth/login') ||
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/logout') ||
+      url.includes('/auth/me')
+    );
   }
 
   private redirectToLogin() {
