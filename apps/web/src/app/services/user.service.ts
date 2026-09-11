@@ -1,17 +1,35 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, finalize, tap, throwError } from 'rxjs';
+import { catchError, finalize, map, tap, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
 type UsersResponse = {
   data: User[];
-  pagination: {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
+  links: {
+    first: string | null;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
   };
+  meta: {
+    current_page: number;
+    from: number | null;
+    last_page: number;
+    links: Array<{
+      url: string | null;
+      label: string;
+      active: boolean;
+    }>;
+    path: string;
+    per_page: number;
+    to: number | null;
+    total: number;
+  };
+};
+
+type UserResponse = {
+  data: User;
 };
 
 type UsersQueryParams = {
@@ -50,10 +68,11 @@ export class UserService {
 
   add(user: User) {
     const payload = this.toPayload(user);
-    return this.http.post<User>(`${this.apiBaseUrl}/users`, payload).pipe(
+    return this.http.post<UserResponse>(`${this.apiBaseUrl}/users`, payload).pipe(
       tap(() => {
         this.fetchFromApi();
       }),
+      map((response) => response.data),
       catchError((error) => {
         this.setOperationError('Failed to create user.');
         console.error('Failed to create user:', error);
@@ -64,10 +83,11 @@ export class UserService {
 
   update(user: User) {
     const payload = this.toPayload(user);
-    return this.http.put<User>(`${this.apiBaseUrl}/users/${user.id}`, payload).pipe(
+    return this.http.put<UserResponse>(`${this.apiBaseUrl}/users/${user.id}`, payload).pipe(
       tap(() => {
         this.fetchFromApi();
       }),
+      map((response) => response.data),
       catchError((error) => {
         this.setOperationError('Failed to update user.');
         console.error('Failed to update user:', error);
@@ -95,7 +115,7 @@ export class UserService {
     const params = new HttpParams({
       fromObject: {
         page: String(query.page ?? 1),
-        pageSize: String(query.pageSize ?? 10),
+        per_page: String(query.pageSize ?? 10),
         ...(query.search?.trim() ? { search: query.search.trim() } : {}),
         ...(query.gender && query.gender !== 'all' ? { gender: query.gender } : {}),
       },
@@ -108,13 +128,13 @@ export class UserService {
       .subscribe({
         next: (response) => {
           this._users.set(response.data);
-          this._total.set(response.pagination.total);
-          this._page.set(response.pagination.page);
-          this._pageSize.set(response.pagination.pageSize);
+          this._total.set(response.meta.total);
+          this._page.set(response.meta.current_page);
+          this._pageSize.set(response.meta.per_page);
           this.currentQuery = {
             ...this.currentQuery,
-            page: response.pagination.page,
-            pageSize: response.pagination.pageSize,
+            page: response.meta.current_page,
+            pageSize: response.meta.per_page,
           };
         },
         error: (error) => {
