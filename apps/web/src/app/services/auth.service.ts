@@ -71,25 +71,6 @@ export class AuthService {
     this._currentUser.set(null);
   }
 
-  /**
-   * Temporary compatibility methods until the guard and interceptor switch to session semantics.
-   */
-  hasValidAccessToken(): boolean {
-    return this.isAuthenticated();
-  }
-
-  getAccessToken(): string | null {
-    return null;
-  }
-
-  clearAccessToken(): void {
-    this.clearCurrentUser();
-  }
-
-  refreshAccessToken(): Observable<string | null> {
-    return this.loadCurrentUser().pipe(map((user) => (user ? 'session' : null)));
-  }
-
   private fetchCurrentUser(): Observable<AuthUser> {
     return this.http
       .get<AuthUserResponse>(`${this.apiBaseUrl}/auth/me`, { withCredentials: true })
