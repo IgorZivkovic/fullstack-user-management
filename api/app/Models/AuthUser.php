@@ -6,6 +6,7 @@ use App\Enums\Role;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 #[Fillable(['email', 'password', 'role'])]
@@ -15,6 +16,11 @@ class AuthUser extends Authenticatable
     use HasFactory;
 
     public $timestamps = false;
+
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
+    }
 
     /**
      * Get the attributes that should be cast.

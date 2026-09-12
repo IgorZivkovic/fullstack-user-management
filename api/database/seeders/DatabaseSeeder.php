@@ -29,5 +29,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'viewer@example.com',
             'password' => 'viewer12345',
         ]);
+
+        $this->call(JobTrackerSeeder::class);
     }
 }
