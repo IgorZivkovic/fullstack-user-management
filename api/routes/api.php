@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\UserController;
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\JsonResponse;
@@ -38,4 +40,12 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         ->middlewareFor('store', Authorize::using('create', User::class))
         ->middlewareFor('update', Authorize::using('update', 'user'))
         ->middlewareFor('destroy', Authorize::using('delete', 'user'));
+
+    Route::apiResource('companies', CompanyController::class)
+        ->middleware('auth:sanctum')
+        ->middlewareFor('index', Authorize::using('viewAny', Company::class))
+        ->middlewareFor('show', Authorize::using('view', 'company'))
+        ->middlewareFor('store', Authorize::using('create', Company::class))
+        ->middlewareFor('update', Authorize::using('update', 'company'))
+        ->middlewareFor('destroy', Authorize::using('delete', 'company'));
 });
