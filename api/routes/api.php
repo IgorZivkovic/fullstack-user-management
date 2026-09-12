@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\UserController;
 use App\Models\Company;
+use App\Models\JobApplication;
 use App\Models\User;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Http\JsonResponse;
@@ -48,4 +50,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         ->middlewareFor('store', Authorize::using('create', Company::class))
         ->middlewareFor('update', Authorize::using('update', 'company'))
         ->middlewareFor('destroy', Authorize::using('delete', 'company'));
+
+    Route::apiResource('job-applications', JobApplicationController::class)
+        ->only(['index', 'show'])
+        ->middleware('auth:sanctum')
+        ->middlewareFor('index', Authorize::using('viewAny', JobApplication::class))
+        ->middlewareFor('show', Authorize::using('view', 'job_application'));
 });
