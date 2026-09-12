@@ -71,4 +71,40 @@ describe('UserService', () => {
     expect(service.total()).toBe(11);
     expect(service.loading()).toBe(false);
   });
+
+  it('cancels an outdated list request when a newer query starts', () => {
+    service.fetchFromApi({ page: 1 });
+    const firstRequest = http.expectOne((candidate) => candidate.url === '/api/v1/users');
+
+    service.fetchFromApi({ page: 6 });
+    const latestRequest = http.expectOne(
+      (candidate) => candidate.url === '/api/v1/users' && candidate.params.get('page') === '6',
+    );
+
+    expect(firstRequest.cancelled).toBe(true);
+    expect(service.loading()).toBe(true);
+
+    latestRequest.flush({
+      data: [],
+      links: {
+        first: null,
+        last: null,
+        prev: null,
+        next: null,
+      },
+      meta: {
+        current_page: 6,
+        from: null,
+        last_page: 6,
+        links: [],
+        path: 'http://127.0.0.1:8000/api/v1/users',
+        per_page: 10,
+        to: null,
+        total: 60,
+      },
+    });
+
+    expect(service.page()).toBe(6);
+    expect(service.loading()).toBe(false);
+  });
 });

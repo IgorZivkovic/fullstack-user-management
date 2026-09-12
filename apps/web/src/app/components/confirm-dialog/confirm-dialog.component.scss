@@ -39,3 +39,8 @@
   gap: 0.75rem;
   margin-top: 0.25rem;
 }
+
+.danger-button {
+  --mdc-filled-button-container-color: var(--app-danger);
+  --mdc-filled-button-label-text-color: #ffffff;
+}

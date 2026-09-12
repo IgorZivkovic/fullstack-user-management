@@ -1,15 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { TuiButton, TuiInput, TuiTextfield } from '@taiga-ui/core';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TuiButton, TuiInput, TuiTextfield],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })

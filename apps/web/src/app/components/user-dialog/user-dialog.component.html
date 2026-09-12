@@ -12,65 +12,54 @@
       </header>
 
       <form [formGroup]="form" class="form">
-        <div class="form-field">
-          <tui-textfield>
-            <label tuiLabel>Name</label>
-            <input tuiInput formControlName="name" />
-          </tui-textfield>
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" />
           @if (form.controls.name.touched && form.controls.name.hasError('required')) {
-            <p class="field-error">Name is required.</p>
+            <mat-error>Name is required.</mat-error>
           }
           @if (form.controls.name.touched && form.controls.name.hasError('minlength')) {
-            <p class="field-error">Name must be at least 2 characters.</p>
+            <mat-error>Name must be at least 2 characters.</mat-error>
           }
-        </div>
+        </mat-form-field>
 
-        <div class="form-field">
-          <tui-textfield>
-            <label tuiLabel>Birthday</label>
-            <input tuiInputDate formControlName="birthday" />
-            <ng-template tuiDropdown>
-              <tui-calendar />
-            </ng-template>
-          </tui-textfield>
+        <mat-form-field appearance="outline">
+          <mat-label>Birthday</mat-label>
+          <input matInput [matDatepicker]="birthdayPicker" formControlName="birthday" />
+          <mat-datepicker-toggle matIconSuffix [for]="birthdayPicker" />
+          <mat-datepicker #birthdayPicker />
           @if (form.controls.birthday.touched && form.controls.birthday.invalid) {
-            <p class="field-error">Birthday is required.</p>
+            <mat-error>Birthday is required.</mat-error>
           }
-        </div>
+        </mat-form-field>
 
-        <tui-textfield>
-          <label tuiLabel>Gender</label>
-          <select
-            tuiSelect
-            formControlName="gender"
-            [items]="genderValues"
-            [labels]="genderLabels"
-          ></select>
-        </tui-textfield>
+        <mat-form-field appearance="outline">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            @for (option of genderOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-        <div class="form-field">
-          <tui-textfield>
-            <label tuiLabel>Country</label>
-            <input tuiInput formControlName="country" />
-          </tui-textfield>
+        <mat-form-field appearance="outline">
+          <mat-label>Country</mat-label>
+          <input matInput formControlName="country" />
           @if (form.controls.country.touched && form.controls.country.hasError('required')) {
-            <p class="field-error">Country is required.</p>
+            <mat-error>Country is required.</mat-error>
           }
           @if (form.controls.country.touched && form.controls.country.hasError('minlength')) {
-            <p class="field-error">Country must be at least 2 characters.</p>
+            <mat-error>Country must be at least 2 characters.</mat-error>
           }
-        </div>
+        </mat-form-field>
       </form>
 
       <footer class="dialog-actions">
-        <button tuiButton size="s" appearance="outline" type="button" (click)="onHide()">
-          Cancel
-        </button>
+        <button mat-stroked-button type="button" (click)="onHide()">Cancel</button>
 
         @if (mode() !== 'view') {
           <button
-            tuiButton
-            size="s"
+            mat-flat-button
             type="button"
             [disabled]="form.invalid || saving()"
             (click)="onSave()"

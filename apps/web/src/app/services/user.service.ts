@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, finalize, map, tap, throwError } from 'rxjs';
+import { Observable, Subject, catchError, map, of, switchMap, tap, throwError } from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
@@ -55,6 +55,7 @@ export class UserService {
   private readonly _page = signal<number>(1);
   private readonly _pageSize = signal<number>(10);
   private readonly _operationError = signal<UserOperationError | null>(null);
+  private readonly queryRequests = new Subject<UsersQueryParams>();
   private currentQuery: UsersQueryParams = { page: 1, pageSize: 10 };
 
   readonly users = this._users.asReadonly();
@@ -64,7 +65,30 @@ export class UserService {
   readonly pageSize = this._pageSize.asReadonly();
   readonly operationError = this._operationError.asReadonly();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {
+    this.queryRequests
+      .pipe(
+        tap(() => this._loading.set(true)),
+        switchMap((query) => this.requestUsers(query)),
+      )
+      .subscribe((response) => {
+        this._loading.set(false);
+
+        if (!response) {
+          return;
+        }
+
+        this._users.set(response.data);
+        this._total.set(response.meta.total);
+        this._page.set(response.meta.current_page);
+        this._pageSize.set(response.meta.per_page);
+        this.currentQuery = {
+          ...this.currentQuery,
+          page: response.meta.current_page,
+          pageSize: response.meta.per_page,
+        };
+      });
+  }
 
   add(user: User) {
     const payload = this.toPayload(user);
@@ -111,7 +135,10 @@ export class UserService {
   fetchFromApi(overrides: UsersQueryParams = {}): void {
     const query = { ...this.currentQuery, ...overrides };
     this.currentQuery = query;
+    this.queryRequests.next(query);
+  }
 
+  private requestUsers(query: UsersQueryParams): Observable<UsersResponse | null> {
     const params = new HttpParams({
       fromObject: {
         page: String(query.page ?? 1),
@@ -121,27 +148,13 @@ export class UserService {
       },
     });
 
-    this._loading.set(true);
-    this.http
-      .get<UsersResponse>(`${this.apiBaseUrl}/users`, { params })
-      .pipe(finalize(() => this._loading.set(false)))
-      .subscribe({
-        next: (response) => {
-          this._users.set(response.data);
-          this._total.set(response.meta.total);
-          this._page.set(response.meta.current_page);
-          this._pageSize.set(response.meta.per_page);
-          this.currentQuery = {
-            ...this.currentQuery,
-            page: response.meta.current_page,
-            pageSize: response.meta.per_page,
-          };
-        },
-        error: (error) => {
-          this.setOperationError('Failed to load users.');
-          console.error('Failed to fetch users from API:', error);
-        },
-      });
+    return this.http.get<UsersResponse>(`${this.apiBaseUrl}/users`, { params }).pipe(
+      catchError((error) => {
+        this.setOperationError('Failed to load users.');
+        console.error('Failed to fetch users from API:', error);
+        return of(null);
+      }),
+    );
   }
 
   private toPayload(user: User): Omit<User, 'id'> {

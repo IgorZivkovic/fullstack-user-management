@@ -1,16 +1,14 @@
 import { Component, DestroyRef, ViewChild, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
-import {
-  TuiButton,
-  TuiInput,
-  TuiLoader,
-  TuiNotificationService,
-  TuiTextfield,
-} from '@taiga-ui/core';
-import { TuiSelect } from '@taiga-ui/kit';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
 import {
@@ -26,12 +24,12 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressBarModule,
+    MatSelectModule,
     RouterLink,
-    TuiButton,
-    TuiInput,
-    TuiLoader,
-    TuiSelect,
-    TuiTextfield,
     UserTableComponent,
     UserDialogComponent,
     ConfirmDialogComponent,
@@ -43,7 +41,7 @@ export class UsersPageComponent {
   @ViewChild(UserDialogComponent) dialogComponent?: UserDialogComponent;
 
   private readonly userService = inject(UserService);
-  private readonly notifications = inject(TuiNotificationService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -71,8 +69,10 @@ export class UsersPageComponent {
     { label: 'Female', value: 'female' },
     { label: 'Other', value: 'other' },
   ];
-  readonly genderValues = this.genderOptions.map((option) => option.value);
-  readonly genderLabels = this.genderOptions.map((option) => option.label);
+
+  get hasActiveFilters(): boolean {
+    return this.searchTerm.trim().length > 0 || this.genderFilter !== 'all';
+  }
 
   constructor() {
     this.searchChanges
@@ -89,12 +89,12 @@ export class UsersPageComponent {
         return;
       }
 
-      this.notifications
-        .open(error.message, {
-          label: 'Operation failed',
-          appearance: 'negative',
-        })
-        .subscribe();
+      this.snackBar.open(error.message, 'Dismiss', {
+        duration: 5000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar'],
+      });
     });
 
     this.loadUsers();

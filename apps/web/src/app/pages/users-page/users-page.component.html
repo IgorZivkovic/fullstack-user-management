@@ -14,11 +14,9 @@
     <span class="toolbar-spacer"></span>
 
     @if (canManageUsers()) {
-      <button tuiButton size="s" type="button" (click)="openAdd()">Add User</button>
+      <button mat-flat-button type="button" (click)="openAdd()">Add User</button>
     }
-    <button tuiButton size="s" appearance="outline" type="button" (click)="handleLogout()">
-      Logout
-    </button>
+    <button mat-stroked-button type="button" (click)="handleLogout()">Logout</button>
   </div>
 </header>
 
@@ -30,26 +28,24 @@
 
   <section class="filters-card" aria-label="User filters">
     <div class="filters-row">
-      <tui-textfield class="filter-field">
-        <label tuiLabel>Search by name or country</label>
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Search by name or country</mat-label>
         <input
-          tuiInput
+          matInput
           type="text"
           [ngModel]="searchTerm"
           (ngModelChange)="handleSearchChange($event)"
         />
-      </tui-textfield>
+      </mat-form-field>
 
-      <tui-textfield class="filter-field">
-        <label tuiLabel>Gender</label>
-        <select
-          tuiSelect
-          [items]="genderValues"
-          [labels]="genderLabels"
-          [ngModel]="genderFilter"
-          (ngModelChange)="handleGenderChange($event)"
-        ></select>
-      </tui-textfield>
+      <mat-form-field class="filter-field" appearance="outline">
+        <mat-label>Gender</mat-label>
+        <mat-select [ngModel]="genderFilter" (ngModelChange)="handleGenderChange($event)">
+          @for (option of genderOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
   </section>
 
@@ -71,24 +67,22 @@
     (confirm)="confirmDelete()"
   />
 
-  <section class="table-card">
+  <section class="table-card" [attr.aria-busy]="loading()">
     @if (loading()) {
-      <div class="loading-card">
-        <tui-loader size="m" />
-        <span>Loading users...</span>
-      </div>
-    } @else {
-      <app-user-table
-        [users]="users()"
-        [first]="first"
-        [totalRecords]="total()"
-        [pageSize]="pageSize"
-        [canManageUsers]="canManageUsers()"
-        (view)="openView($event)"
-        (edit)="openEdit($event)"
-        (remove)="handleDelete($event)"
-        (pageChange)="handlePageChange($event)"
-      />
+      <mat-progress-bar class="table-progress" mode="indeterminate" />
     }
+    <app-user-table
+      [users]="users()"
+      [first]="first"
+      [totalRecords]="total()"
+      [pageSize]="pageSize"
+      [canManageUsers]="canManageUsers()"
+      [hasActiveFilters]="hasActiveFilters"
+      [loading]="loading()"
+      (view)="openView($event)"
+      (edit)="openEdit($event)"
+      (remove)="handleDelete($event)"
+      (pageChange)="handlePageChange($event)"
+    />
   </section>
 </main>

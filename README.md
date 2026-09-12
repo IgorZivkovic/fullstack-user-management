@@ -17,7 +17,7 @@ A portfolio-oriented full-stack application for managing users, built with an An
 
 ## Tech stack
 
-- **Frontend:** Angular 21, RxJS, Taiga UI, SCSS
+- **Frontend:** Angular 21, Angular Material, RxJS, SCSS
 - **Backend:** Laravel 13, PHP 8.3+, Laravel Sanctum, Eloquent ORM
 - **Database:** MySQL 8
 - **API documentation:** Scramble / OpenAPI

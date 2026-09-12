@@ -85,15 +85,16 @@
 }
 
 .table-card {
+  position: relative;
   padding: 0.5rem;
 }
 
-.loading-card {
-  min-height: 96px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+.table-progress {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
 }
 
 @media (max-width: 760px) {

@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, effect, inject, input, model } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { TuiDay } from '@taiga-ui/cdk/date-time';
-import { TuiButton, TuiInput, TuiTextfield } from '@taiga-ui/core';
-import { TuiInputDate, TuiSelect } from '@taiga-ui/kit';
+import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import { Gender, User } from '../../models/user.model';
 
@@ -14,12 +17,13 @@ export type UserDialogMode = 'add' | 'edit' | 'view';
   standalone: true,
   imports: [
     CommonModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+    MatSelectModule,
     ReactiveFormsModule,
-    TuiButton,
-    TuiInput,
-    TuiInputDate,
-    TuiSelect,
-    TuiTextfield,
   ],
   templateUrl: './user-dialog.component.html',
   styleUrl: './user-dialog.component.scss',
@@ -40,13 +44,10 @@ export class UserDialogComponent {
     { label: 'Female', value: 'female' },
     { label: 'Other', value: 'other' },
   ];
-  readonly genderValues = this.genderOptions.map((option) => option.value);
-  readonly genderLabels = this.genderOptions.map((option) => option.label);
-
   readonly form = this.fb.nonNullable.group({
     id: 0,
     name: ['', [Validators.required, Validators.minLength(2)]],
-    birthday: [null as TuiDay | null, [Validators.required]],
+    birthday: [null as Date | null, [Validators.required]],
     gender: ['male' as Gender, [Validators.required]],
     country: ['', [Validators.required, Validators.minLength(2)]],
   });
@@ -88,7 +89,7 @@ export class UserDialogComponent {
       this.form.reset({
         id: u.id,
         name: u.name,
-        birthday: TuiDay.jsonParse(u.birthday),
+        birthday: this.parseDate(u.birthday),
         gender: u.gender,
         country: u.country,
       });
@@ -117,7 +118,7 @@ export class UserDialogComponent {
     const result: User = {
       id: raw.id || Date.now(),
       name: raw.name.trim(),
-      birthday: birthday.toJSON(),
+      birthday: this.formatDate(birthday),
       gender: raw.gender,
       country: raw.country.trim(),
     };
@@ -133,5 +134,17 @@ export class UserDialogComponent {
 
     this.form.enable();
     this.form.controls.id.disable();
+  }
+
+  private parseDate(value: string): Date {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private formatDate(value: Date): string {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

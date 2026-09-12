@@ -5,37 +5,33 @@
       <p>Sign in with an administrator or read-only demo account.</p>
     </header>
 
-    <div class="form-field">
-      <tui-textfield>
-        <label tuiLabel>Email</label>
-        <input id="email" type="email" tuiInput formControlName="email" autocomplete="email" />
-      </tui-textfield>
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input id="email" type="email" matInput formControlName="email" autocomplete="email" />
       @if (form.controls.email.touched && form.controls.email.invalid) {
-        <p class="field-error">Enter a valid email address.</p>
+        <mat-error>Enter a valid email address.</mat-error>
       }
-    </div>
+    </mat-form-field>
 
-    <div class="form-field">
-      <tui-textfield>
-        <label tuiLabel>Password</label>
-        <input
-          id="password"
-          type="password"
-          tuiInput
-          formControlName="password"
-          autocomplete="current-password"
-        />
-      </tui-textfield>
+    <mat-form-field appearance="outline">
+      <mat-label>Password</mat-label>
+      <input
+        id="password"
+        type="password"
+        matInput
+        formControlName="password"
+        autocomplete="current-password"
+      />
       @if (form.controls.password.touched && form.controls.password.invalid) {
-        <p class="field-error">Password must be at least 6 characters.</p>
+        <mat-error>Password must be at least 6 characters.</mat-error>
       }
-    </div>
+    </mat-form-field>
 
     @if (errorMessage()) {
       <p class="form-error">{{ errorMessage() }}</p>
     }
 
-    <button tuiButton size="l" type="submit" [disabled]="submitting()">Sign in</button>
+    <button mat-flat-button type="submit" [disabled]="submitting()">Sign in</button>
 
     <a routerLink="/" class="login-card__link">Back to home</a>
   </form>
