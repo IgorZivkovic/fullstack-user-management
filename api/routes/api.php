@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\JobApplicationController;
+use App\Http\Controllers\JobTrackerDashboardController;
 use App\Http\Controllers\UserController;
 use App\Models\Company;
 use App\Models\JobApplication;
@@ -59,6 +60,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         ->middlewareFor('store', Authorize::using('create', JobApplication::class))
         ->middlewareFor('update', Authorize::using('update', 'job_application'))
         ->middlewareFor('destroy', Authorize::using('delete', 'job_application'));
+
+    Route::get('/dashboard', JobTrackerDashboardController::class)
+        ->middleware('auth:sanctum')
+        ->name('dashboard.show');
 
     Route::scopeBindings()->middleware('auth:sanctum')->group(function (): void {
         Route::get('/job-applications/{job_application}/interviews', [InterviewController::class, 'index'])

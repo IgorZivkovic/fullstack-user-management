@@ -24,6 +24,14 @@ class InterviewResource extends JsonResource
             'location_or_link' => $this->location_or_link,
             'notes' => $this->notes,
             'outcome' => $this->outcome?->value,
+            'job_application' => $this->whenLoaded('jobApplication', fn () => [
+                'id' => $this->jobApplication->id,
+                'position' => $this->jobApplication->position,
+                'company' => [
+                    'id' => $this->jobApplication->company->id,
+                    'name' => $this->jobApplication->company->name,
+                ],
+            ]),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];
