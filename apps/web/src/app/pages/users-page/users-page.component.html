@@ -40,24 +40,19 @@
     </div>
   </section>
 
-  <section class="table-card" [attr.aria-busy]="loading()">
-    @if (loading()) {
-      <mat-progress-bar class="table-progress" mode="indeterminate" aria-label="Loading users" />
-    }
-    <app-user-table
-      [users]="users()"
-      [first]="first"
-      [totalRecords]="total()"
-      [pageSize]="pageSize"
-      [canManageUsers]="canManageUsers()"
-      [hasActiveFilters]="hasActiveFilters"
-      [loading]="loading()"
-      (view)="openView($event)"
-      (edit)="openEdit($event)"
-      (remove)="handleDelete($event)"
-      (pageChange)="handlePageChange($event)"
-    />
-  </section>
+  <app-user-table
+    [users]="users()"
+    [first]="first"
+    [totalRecords]="total()"
+    [pageSize]="pageSize"
+    [canManageUsers]="canManageUsers()"
+    [hasActiveFilters]="hasActiveFilters"
+    [loading]="loading()"
+    (view)="openView($event)"
+    (edit)="openEdit($event)"
+    (remove)="handleDelete($event)"
+    (pageChange)="handlePageChange($event)"
+  />
 
   <app-user-dialog
     [visible]="dialogVisible()"

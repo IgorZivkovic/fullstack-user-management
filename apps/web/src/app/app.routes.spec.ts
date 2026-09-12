@@ -1,5 +1,6 @@
 import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { ApplicationsPageComponent } from './pages/applications-page/applications-page.component';
 import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
 import { routes } from './app.routes';
 
@@ -28,5 +29,14 @@ describe('application routes', () => {
     const companiesRoute = shellRoute?.children?.find((route) => route.path === 'companies');
 
     expect(companiesRoute?.component).toBe(CompaniesPageComponent);
+  });
+
+  it('uses the real applications list while keeping the details placeholder', () => {
+    const shellRoute = routes.find((route) => route.component === AppShellComponent);
+    const applicationsRoute = shellRoute?.children?.find((route) => route.path === 'applications');
+    const detailsRoute = shellRoute?.children?.find((route) => route.path === 'applications/:id');
+
+    expect(applicationsRoute?.component).toBe(ApplicationsPageComponent);
+    expect(detailsRoute).toBeDefined();
   });
 });

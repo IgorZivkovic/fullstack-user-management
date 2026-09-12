@@ -1,0 +1,19 @@
+<main class="page">
+  <header class="page-toolbar">
+    <div>
+      <p class="section-label">Job Application Tracker</p>
+      <h1>Applications</h1>
+      <p class="toolbar-subtitle">Review your current opportunities and next actions.</p>
+    </div>
+  </header>
+
+  <app-application-table
+    [applications]="applications()"
+    [loading]="loading()"
+    [emptyMessage]="emptyMessage"
+    [totalRecords]="total()"
+    [pageIndex]="currentPage() - 1"
+    [pageSize]="pageSize"
+    (pageChange)="handlePageChange($event)"
+  />
+</main>

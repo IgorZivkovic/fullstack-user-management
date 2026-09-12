@@ -6,6 +6,7 @@ import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { JobTrackerPlaceholderComponent } from './pages/job-tracker-placeholder/job-tracker-placeholder.component';
 import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
+import { ApplicationsPageComponent } from './pages/applications-page/applications-page.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
@@ -26,11 +27,7 @@ export const routes: Routes = [
       },
       {
         path: 'applications',
-        component: JobTrackerPlaceholderComponent,
-        data: {
-          title: 'Applications',
-          description: 'Search, filter, and manage job applications from this page.',
-        },
+        component: ApplicationsPageComponent,
       },
       {
         path: 'applications/:id',

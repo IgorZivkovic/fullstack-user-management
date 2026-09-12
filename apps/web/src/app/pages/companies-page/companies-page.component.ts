@@ -1,21 +1,17 @@
-import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import {
   CompanyDialogComponent,
   CompanyDialogMode,
 } from '../../components/company-dialog/company-dialog.component';
+import { CompanyTableComponent } from '../../components/company-table/company-table.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { Company, CompanyPayload } from '../../models/job-tracker.model';
 import { ApiErrorService } from '../../services/api-error.service';
@@ -25,17 +21,12 @@ import { CompanyService } from '../../services/company.service';
   selector: 'app-companies-page',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule,
-    MatPaginatorModule,
-    MatProgressBarModule,
-    MatTableModule,
-    MatTooltipModule,
     CompanyDialogComponent,
+    CompanyTableComponent,
     ConfirmDialogComponent,
   ],
   templateUrl: './companies-page.component.html',
@@ -48,7 +39,6 @@ export class CompaniesPageComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchChanges = new Subject<string>();
 
-  readonly displayedColumns = ['name', 'location', 'website', 'notes', 'actions'];
   readonly companies = signal<Company[]>([]);
   readonly loading = signal(false);
   readonly total = signal(0);

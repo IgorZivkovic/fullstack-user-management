@@ -50,8 +50,7 @@
   gap: 1rem;
 }
 
-.filters-card,
-.table-card {
+.filters-card {
   overflow: hidden;
   background: var(--app-card-bg);
   border: 1px solid var(--app-border);
@@ -71,19 +70,6 @@
 
 .filter-field {
   width: 100%;
-}
-
-.table-card {
-  position: relative;
-  padding: 0.5rem;
-}
-
-.table-progress {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  right: 0;
-  left: 0;
 }
 
 @media (max-width: 760px) {

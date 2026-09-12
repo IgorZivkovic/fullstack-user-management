@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { User } from '../../models/user.model';
+import { DataTableShellComponent } from '../../shared/components/data-table-shell/data-table-shell.component';
 
 @Component({
   selector: 'app-user-table',
@@ -14,9 +15,9 @@ import { User } from '../../models/user.model';
     CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatPaginatorModule,
     MatTableModule,
     MatTooltipModule,
+    DataTableShellComponent,
   ],
   templateUrl: './user-table.component.html',
   styleUrl: './user-table.component.scss',
