@@ -1,12 +1,8 @@
 import { Routes } from '@angular/router';
-import { LandingComponent } from './pages/landing/landing.component';
-import { LoginComponent } from './pages/login/login.component';
-import { UsersPageComponent } from './pages/users-page/users-page.component';
 import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
-import { JobTrackerPlaceholderComponent } from './pages/job-tracker-placeholder/job-tracker-placeholder.component';
-import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
-import { ApplicationsPageComponent } from './pages/applications-page/applications-page.component';
+import { LandingComponent } from './pages/landing/landing.component';
+import { LoginComponent } from './pages/login/login.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
@@ -18,7 +14,10 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: JobTrackerPlaceholderComponent,
+        loadComponent: () =>
+          import('./pages/job-tracker-placeholder/job-tracker-placeholder.component').then(
+            (module) => module.JobTrackerPlaceholderComponent,
+          ),
         data: {
           title: 'Dashboard',
           description:
@@ -27,11 +26,17 @@ export const routes: Routes = [
       },
       {
         path: 'applications',
-        component: ApplicationsPageComponent,
+        loadComponent: () =>
+          import('./pages/applications-page/applications-page.component').then(
+            (module) => module.ApplicationsPageComponent,
+          ),
       },
       {
         path: 'applications/:id',
-        component: JobTrackerPlaceholderComponent,
+        loadComponent: () =>
+          import('./pages/job-tracker-placeholder/job-tracker-placeholder.component').then(
+            (module) => module.JobTrackerPlaceholderComponent,
+          ),
         data: {
           title: 'Application details',
           description: 'Application details and the interview timeline will appear here.',
@@ -39,9 +44,18 @@ export const routes: Routes = [
       },
       {
         path: 'companies',
-        component: CompaniesPageComponent,
+        loadComponent: () =>
+          import('./pages/companies-page/companies-page.component').then(
+            (module) => module.CompaniesPageComponent,
+          ),
       },
-      { path: 'users', component: UsersPageComponent },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./pages/users-page/users-page.component').then(
+            (module) => module.UsersPageComponent,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
