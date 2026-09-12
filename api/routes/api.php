@@ -52,8 +52,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         ->middlewareFor('destroy', Authorize::using('delete', 'company'));
 
     Route::apiResource('job-applications', JobApplicationController::class)
-        ->only(['index', 'show'])
         ->middleware('auth:sanctum')
         ->middlewareFor('index', Authorize::using('viewAny', JobApplication::class))
-        ->middlewareFor('show', Authorize::using('view', 'job_application'));
+        ->middlewareFor('show', Authorize::using('view', 'job_application'))
+        ->middlewareFor('store', Authorize::using('create', JobApplication::class))
+        ->middlewareFor('update', Authorize::using('update', 'job_application'))
+        ->middlewareFor('destroy', Authorize::using('delete', 'job_application'));
 });

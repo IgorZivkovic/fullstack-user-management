@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ListJobApplicationsRequest;
+use App\Http\Requests\StoreJobApplicationRequest;
+use App\Http\Requests\UpdateJobApplicationRequest;
 use App\Http\Resources\JobApplicationResource;
 use App\Models\AuthUser;
 use App\Models\JobApplication;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class JobApplicationController extends Controller
 {
@@ -52,5 +56,49 @@ class JobApplicationController extends Controller
     public function show(JobApplication $jobApplication): JobApplicationResource
     {
         return new JobApplicationResource($jobApplication->load('company:id,name'));
+    }
+
+    public function store(StoreJobApplicationRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $companyId = $data['company_id'];
+        unset($data['company_id']);
+
+        /** @var AuthUser $authUser */
+        $authUser = $request->user();
+        $company = $authUser->companies()->findOrFail($companyId);
+        $application = $company->jobApplications()->create($data);
+
+        return (new JobApplicationResource($application->load('company:id,name')))
+            ->response()
+            ->setStatusCode(Response::HTTP_CREATED);
+    }
+
+    public function update(
+        UpdateJobApplicationRequest $request,
+        JobApplication $jobApplication,
+    ): JobApplicationResource {
+        $data = $request->validated();
+
+        if (array_key_exists('company_id', $data)) {
+            /** @var AuthUser $authUser */
+            $authUser = $request->user();
+            $company = $authUser->companies()->findOrFail($data['company_id']);
+            $jobApplication->company()->associate($company);
+            unset($data['company_id']);
+        }
+
+        $jobApplication->fill($data)->save();
+
+        return new JobApplicationResource(
+            $jobApplication->refresh()->load('company:id,name'),
+        );
+    }
+
+    public function destroy(JobApplication $jobApplication): JsonResponse
+    {
+        $jobApplication->delete();
+
+        return response()->json(['deleted' => true]);
     }
 }
