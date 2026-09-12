@@ -1,279 +1,207 @@
-# Full-stack user management demo (Angular + NestJS + Drizzle)
+# Full-stack user management demo
 
-Small full-stack demo with an Angular v21 UI and NestJS API.
-
-This repo is an Nx workspace with:
-
-- Angular app at `apps/web`
-- NestJS API at `api`
-- Shared library at `shared` for types/interfaces/DTOs (imported via `@shared/*`)
-
-## Overview
-
-The application consists of:
-
-- A **Landing Page** demonstrating layout, SCSS structure, and responsive design
-- A **Login Page** for email/password sign-in before accessing protected routes
-- A **Data Management Page** for managing users via a table and modal dialogs
-
-The pages are connected via Angular routing, with `/users` protected by auth.
+A portfolio-oriented full-stack application for managing users, built with an Angular frontend and a Laravel REST API.
 
 ## Features
 
-- User list displayed in a table with the following fields:
-  - id, name, birthday, gender, country
-- Full CRUD functionality (API-backed):
-  - Add user (modal)
-  - Edit user (modal)
-  - View user (read-only modal)
-  - Delete user (confirmation dialog)
-- Pagination and filtering (search + gender)
-- Validation errors with consistent error codes
-- Swagger documentation for API endpoints
-- Loading indicator while API requests are in flight
-- JWT auth with short-lived access tokens and HttpOnly refresh cookie
-- Role-based access control (RBAC): admins manage users, regular users have read-only access
+- Email and password authentication
+- Session-based SPA authentication with Laravel Sanctum
+- Role-based access control:
+  - administrators can create, view, update, and delete users
+  - regular users have read-only access
+- Paginated user list with name/country search and gender filtering
+- Server-side validation and consistent API error responses
+- Responsive Angular interface with loading and error states
+- OpenAPI documentation generated from the Laravel API
+- Automated frontend and backend tests
 
-## Tech Stack
+## Tech stack
 
-- **Frontend:** Angular v21, RxJS, Taiga UI, SCSS
-- **Backend:** NestJS v11, Passport + JWT (local/jwt strategies), Swagger, class-validator/transformer
-- **Data:** Drizzle ORM, SQLite (better-sqlite3)
-- **Security:** Argon2 password hashing, HttpOnly refresh cookie
-- **Authorization:** Backend-enforced `admin`/`user` roles with permission-aware Angular UI
-- **Tooling:** Nx workspace, TypeScript, Webpack, ESLint, Prettier
+- **Frontend:** Angular 21, RxJS, Taiga UI, SCSS
+- **Backend:** Laravel 13, PHP 8.3+, Laravel Sanctum, Eloquent ORM
+- **Database:** MySQL 8
+- **API documentation:** Scramble / OpenAPI
+- **Workspace tooling:** Nx for the Angular application and shared TypeScript code
 
-## Angular 22 upgrade note
+## Repository structure
 
-This project intentionally stays on Angular v21 for now instead of moving to Angular v22 immediately.
+```text
+apps/web/   Angular application
+api/        Laravel API
+shared/     Shared frontend TypeScript contracts
+```
 
-Angular v22 is available, and the UI has been migrated from PrimeNG to Taiga UI to avoid the PrimeNG v22 compatibility/licensing ambiguity in this demo stack. The remaining upgrade decision is to move the whole Nx workspace to Angular v22 in one coordinated dependency update rather than mixing framework majors across the repo.
+Laravel is kept as a standard Composer application in `api/`. Nx manages the Angular side of the workspace, while the root npm scripts also provide convenient commands for running and testing both applications.
 
-There was also a licensing consideration in the previous UI stack. Existing PrimeNG v21 releases remain MIT licensed, but PrimeNG v22 moved under the new PrimeUI dual Community/Commercial model instead of the previous open-source MIT model.
+## Prerequisites
 
-For a portfolio/demo application, the priority is a stable and reproducible stack without peer dependency conflicts or licensing ambiguity. The UI library migration has already been completed; the future upgrade path is a focused Angular/Nx v22+ migration.
+Install the following before starting:
 
-## Technical Details
+- A currently supported Node.js release with npm
+- PHP 8.3 or newer with the extensions required by Laravel and MySQL
+- Composer 2
+- MySQL 8.x
 
-- **Angular v21**
-  - Standalone components
-  - Modern dependency injection (`inject`)
-  - Signals for state and inputs (`signal`, `input`, `model`)
-  - Reactive forms
-  - New Angular control flow syntax
-- **UI**
-  - Taiga UI components for forms, buttons, pagination, notifications, and date inputs
-  - Reusable standalone user and confirmation dialog components
-- **State**
-  - UI state stored in a service using signals
-  - Data fetched from the API via HttpClient
-  - Loading flag exposed to gate UI while requests are in flight
-- **Styling**
-  - SCSS with variables and nesting
-  - Component-scoped styles
-  - Responsive layout
-- **Backend (NestJS v11)**
-  - REST API with versioned routes (`/api/v1`)
-  - DTO validation with global pipes
-  - Global exception filter with error codes
-  - Request logging middleware (method, path, status, duration)
-  - Swagger docs at `/api/v1/docs`
-  - Auth endpoints for login/refresh/logout/me
-- **Shared**
-  - Shared `User`/`Gender` types via `@shared/*`
+## First-time setup
 
-## Architecture
+Run the following commands from the repository root.
 
-- Pages orchestrate routing, filters, and modal interactions
-- Presentational components handle table rendering and dialogs
-- Frontend service owns UI state and delegates CRUD to the API
-- Backend uses a controller/service split with a shared database service
+### 1. Install dependencies
 
-## Running the project
+```powershell
+npm ci
+cd api
+composer install
+cd ..
+```
 
-Defaults are provided in `.env` (tracked); adjust values there if needed.
+### 2. Create the Laravel environment file
 
-The tracked `.env` file contains demo-only placeholder values so the project can be cloned and run without extra setup. In a production deployment, secrets such as JWT keys and admin credentials should be provided by the hosting environment or a secret manager, not committed to source control.
+PowerShell:
 
-Frontend origin for CORS is controlled by `WEB_ORIGIN` in `.env`.
+```powershell
+Copy-Item api/.env.example api/.env
+```
 
-Frontend (web):
+macOS, Linux, or Git Bash:
 
 ```bash
-npm install
-npm start  # runs: nx serve web
+cp api/.env.example api/.env
 ```
 
-Then open http://localhost:4200/.
+The local `api/.env` file is intentionally ignored by Git. The tracked `api/.env.example` contains the safe defaults needed to configure a new clone.
 
-Backend (api):
+Generate the application key:
 
-```bash
-npm run start:api
+```powershell
+cd api
+php artisan key:generate
+cd ..
 ```
 
-By default the API runs on http://localhost:3000/api/v1.
+### 3. Create the MySQL database
 
-Health check:
+You can use an existing local MySQL account, or create a dedicated development database and user:
 
-```
-GET http://localhost:3000/api/v1/health
-```
+```sql
+CREATE DATABASE fullstack_user_management
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 
-Swagger docs:
+CREATE USER 'fullstack_app'@'localhost'
+    IDENTIFIED BY 'choose_a_local_password';
 
-```
-http://localhost:3000/api/v1/docs
-```
+GRANT ALL PRIVILEGES
+    ON fullstack_user_management.*
+    TO 'fullstack_app'@'localhost';
 
-Users endpoints:
-
-```
-GET    /api/v1/users
-GET    /api/v1/users/:id
-POST   /api/v1/users
-PUT    /api/v1/users/:id
-DELETE /api/v1/users/:id
+FLUSH PRIVILEGES;
 ```
 
-Auth endpoints:
+Set the matching values in `api/.env`:
 
-```
-POST /api/v1/auth/login
-POST /api/v1/auth/refresh
-POST /api/v1/auth/logout
-GET  /api/v1/auth/me
-```
-
-Default demo credentials (from `.env`):
-
-```
-# Full CRUD access
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=admin12345
-
-# Read-only access
-VIEWER_EMAIL=viewer@example.com
-VIEWER_PASSWORD=viewer12345
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=fullstack_user_management
+DB_USERNAME=fullstack_app
+DB_PASSWORD=choose_a_local_password
 ```
 
-The API enforces permissions independently from the UI. Both roles can use `GET /users` and
-`GET /users/:id`; only the `admin` role can use `POST`, `PUT`, and `DELETE` user endpoints.
+Use your own local password instead of the example value above.
 
-Pagination and filtering for the list endpoint:
+### 4. Run migrations and seed demo data
 
-```
-GET /api/v1/users?page=1&pageSize=10&search=ana&gender=female
-```
-
-Error responses use a consistent shape with `errorCode` and optional `details` for validation failures:
-
-```json
-{
-  "statusCode": 400,
-  "errorCode": "VALIDATION_ERROR",
-  "timestamp": "2026-01-07T09:15:22.123Z",
-  "path": "/api/v1/users",
-  "message": "Validation failed",
-  "details": ["name should not be empty"]
-}
+```powershell
+cd api
+php artisan migrate --seed
+cd ..
 ```
 
-Both apps in parallel:
+The seeder creates 60 deterministic user records and the two demo accounts listed below.
 
-```bash
+### 5. Start the application
+
+```powershell
 npm run start:all
 ```
 
-The Users page pulls data from the API (`GET /api/v1/users`), so make sure the API is running before opening `/users`.
+This starts both development servers:
 
-Build:
+- Angular application: http://localhost:4200
+- Laravel API: http://127.0.0.1:8000/api/v1
+- Health check: http://127.0.0.1:8000/api/v1/health
+- OpenAPI UI: http://127.0.0.1:8000/api/v1/docs
+- OpenAPI JSON: http://127.0.0.1:8000/api/v1/docs/openapi.json
 
-```bash
-npm run build      # web only
-npm run build:all  # web + api
+## Demo accounts
+
+These credentials exist only for the seeded local demo:
+
+| Access | Email | Password | Permissions |
+| --- | --- | --- | --- |
+| Administrator | `admin@example.com` | `admin12345` | Full user CRUD |
+| Viewer | `viewer@example.com` | `viewer12345` | Read-only user access |
+
+The viewer is represented by the `user` role in the API.
+
+## Authentication
+
+The application uses Laravel Sanctum's stateful SPA authentication. Before login, the Angular client requests `/sanctum/csrf-cookie`; after successful login, the browser uses the Laravel session cookie for authenticated requests. No access token is stored in browser storage.
+
+When testing authentication from another HTTP client, enable cookie persistence and send the CSRF cookie/header pair expected by Sanctum.
+
+## API overview
+
+All application endpoints use the `/api/v1` prefix.
+
+| Method | Endpoint | Access |
+| --- | --- | --- |
+| `GET` | `/health` | Public |
+| `POST` | `/auth/login` | Public |
+| `POST` | `/auth/logout` | Authenticated |
+| `GET` | `/auth/me` | Authenticated |
+| `GET` | `/users` | Administrator and viewer |
+| `GET` | `/users/{user}` | Administrator and viewer |
+| `POST` | `/users` | Administrator |
+| `PUT/PATCH` | `/users/{user}` | Administrator |
+| `DELETE` | `/users/{user}` | Administrator |
+
+The user collection follows Laravel pagination conventions:
+
+```text
+GET /api/v1/users?page=1&per_page=10&search=ana&gender=female
 ```
 
-## Database
+The response contains the user records in `data`, navigation URLs in `links`, and pagination information in `meta`.
 
-The API uses Drizzle ORM with SQLite. Defaults are in `.env`.
+Validation and application errors use a consistent response containing `statusCode`, `errorCode`, `timestamp`, `path`, and `message`, with optional validation details.
 
-```
-DATABASE_URL=./user_management.db
-```
+## Useful commands
 
-Generate migrations after changing the schema:
+Run these from the repository root:
 
-```bash
-npm run db:generate
-```
+| Command | Purpose |
+| --- | --- |
+| `npm start` | Start the Angular development server |
+| `npm run start:api` | Start the Laravel development server |
+| `npm run start:all` | Start Angular and Laravel together |
+| `npm run start:full` | Apply pending migrations, then start both servers |
+| `npm test` | Run the Angular and Laravel test suites |
+| `npm run test:web` | Run Angular tests |
+| `npm run test:api` | Run Laravel tests |
+| `npm run build` | Create the Angular production build |
+| `npm run db:migrate` | Apply pending Laravel migrations |
+| `npm run db:seed` | Seed the configured database |
+| `npm run db:fresh` | Recreate all tables and seed them; existing data is deleted |
 
-Apply migrations:
+## Migration history
 
-```bash
-npm run db:migrate
-```
+The project was initially built with a Node.js/NestJS backend, Drizzle ORM, and SQLite. The backend was later migrated to Laravel, Eloquent, MySQL, and Sanctum while preserving the existing REST functionality and role-based access rules.
 
-Seed demo data (50+ users):
-
-```bash
-npm run db:seed
-```
-
-Change the number of seeded users:
-
-```bash
-SEED_COUNT=80 npm run db:seed
-```
-
-PowerShell:
-
-```powershell
-$env:SEED_COUNT=80; npm run db:seed
-```
-
-To force reseeding (clears existing users):
-
-```bash
-SEED_FORCE=1 npm run db:seed
-```
-
-PowerShell:
-
-```powershell
-$env:SEED_FORCE=1; npm run db:seed
-```
-
-Optional Drizzle Studio:
-
-```bash
-npm run db:studio
-```
-
-One-shot setup (migrate + seed if empty + both apps):
-
-```bash
-npm run start:full
-```
-
-## Nx workspace notes
-
-Common tasks:
-
-```bash
-nx serve web
-nx serve api
-nx build web
-nx build api
-nx test web
-```
-
-You can also inspect the project graph with:
-
-```bash
-nx graph
-```
+The migration also adopted Laravel conventions for request validation, API resources, authorization policies, session authentication, database migrations, seeders, and pagination.
 
 ## Production considerations
 
-This repository is intentionally scoped as a local full-stack demo. A production deployment should add managed secrets, distributed rate limiting, hardened HTTP headers, a production database, and a broader auth/security review.
+The included credentials and environment defaults are intended only for local demonstration. For deployment, use unique secrets, disable debug mode, configure the production database and trusted frontend domains, serve both applications over HTTPS, and do not seed the demo accounts.
