@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import {
   CompanyDialogComponent,
@@ -16,6 +17,7 @@ import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-
 import { Company, CompanyPayload } from '../../models/job-tracker.model';
 import { ApiErrorService } from '../../services/api-error.service';
 import { CompanyService } from '../../services/company.service';
+import { readCompanyQueryState, writeCompanyQueryState } from './company-query-state';
 
 @Component({
   selector: 'app-companies-page',
@@ -37,6 +39,8 @@ export class CompaniesPageComponent {
   private readonly apiErrors = inject(ApiErrorService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly searchChanges = new Subject<string>();
 
   readonly companies = signal<Company[]>([]);
@@ -61,10 +65,7 @@ export class CompaniesPageComponent {
   constructor() {
     this.searchChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.currentPage.set(1);
-        this.loadCompanies(1);
-      });
+      .subscribe(() => this.updateQueryParams(1));
 
     effect(() => {
       const error = this.apiErrors.lastError();
@@ -80,7 +81,12 @@ export class CompaniesPageComponent {
       });
     });
 
-    this.loadCompanies();
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const state = readCompanyQueryState(params);
+      this.searchTerm = state.search;
+      this.currentPage.set(state.page);
+      this.loadCompanies(state.page);
+    });
   }
 
   openCreate(): void {
@@ -121,7 +127,7 @@ export class CompaniesPageComponent {
           this.snackBar.open(wasCreated ? 'Company added.' : 'Company updated.', 'Dismiss', {
             duration: 3000,
           });
-          this.loadCompanies(wasCreated ? 1 : this.currentPage());
+          this.refreshPage(wasCreated ? 1 : this.currentPage());
         },
         error: () => {
           // ApiErrorService displays the backend validation or operation message.
@@ -167,7 +173,7 @@ export class CompaniesPageComponent {
             this.companies().length === 1 && this.currentPage() > 1
               ? this.currentPage() - 1
               : this.currentPage();
-          this.loadCompanies(targetPage);
+          this.refreshPage(targetPage);
         },
         error: () => {
           this.confirmDeleteVisible.set(false);
@@ -184,7 +190,7 @@ export class CompaniesPageComponent {
   handlePageChange(event: PageEvent): void {
     const page = event.pageIndex + 1;
     if (page !== this.currentPage()) {
-      this.loadCompanies(page);
+      this.updateQueryParams(page);
     }
   }
 
@@ -207,5 +213,22 @@ export class CompaniesPageComponent {
           // ApiErrorService keeps the previous list visible and reports the error.
         },
       });
+  }
+
+  private refreshPage(page: number): void {
+    if (page !== this.currentPage()) {
+      this.updateQueryParams(page);
+      return;
+    }
+
+    this.loadCompanies(page);
+  }
+
+  private updateQueryParams(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: writeCompanyQueryState({ page, search: this.searchTerm }),
+      replaceUrl: true,
+    });
   }
 }

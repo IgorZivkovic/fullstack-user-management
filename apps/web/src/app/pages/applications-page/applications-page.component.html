@@ -7,6 +7,85 @@
     </div>
   </header>
 
+  <section class="filters-card" aria-label="Application filters">
+    <div class="filters-grid">
+      <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search position or company</mat-label>
+        <input
+          matInput
+          type="search"
+          [ngModel]="searchTerm"
+          (ngModelChange)="handleSearchChange($event)"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()">
+          <mat-option value="">All statuses</mat-option>
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ status | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Work mode</mat-label>
+        <mat-select [(ngModel)]="selectedWorkMode" (selectionChange)="applyFilters()">
+          <mat-option value="">All work modes</mat-option>
+          @for (workMode of workModes; track workMode) {
+            <mat-option [value]="workMode">{{ workMode | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="company-field" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Company</mat-label>
+        <mat-select
+          [(ngModel)]="selectedCompanyId"
+          [disabled]="companiesLoading()"
+          (selectionChange)="applyFilters()"
+        >
+          <mat-option [value]="null">All companies</mat-option>
+          @for (company of companies(); track company.id) {
+            <mat-option [value]="company.id">{{ company.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Sort by</mat-label>
+        <mat-select [(ngModel)]="selectedSort" (selectionChange)="applyFilters()">
+          <mat-option value="created_at">Date added</mat-option>
+          <mat-option value="position">Position</mat-option>
+          <mat-option value="status">Status</mat-option>
+          <mat-option value="work_mode">Work mode</mat-option>
+          <mat-option value="applied_at">Applied date</mat-option>
+          <mat-option value="next_action_at">Next action</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Direction</mat-label>
+        <mat-select [(ngModel)]="selectedDirection" (selectionChange)="applyFilters()">
+          <mat-option value="asc">Ascending</mat-option>
+          <mat-option value="desc">Descending</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Reset filters
+      </button>
+    </div>
+  </section>
+
   <app-application-table
     [applications]="applications()"
     [loading]="loading()"

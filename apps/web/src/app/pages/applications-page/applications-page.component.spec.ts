@@ -1,10 +1,11 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { JobApplication } from '../../models/job-tracker.model';
 import { ApiErrorService } from '../../services/api-error.service';
+import { CompanyService } from '../../services/company.service';
 import { JobApplicationService } from '../../services/job-application.service';
 import { ApplicationsPageComponent } from './applications-page.component';
 
@@ -12,6 +13,8 @@ describe('ApplicationsPageComponent', () => {
   let fixture: ComponentFixture<ApplicationsPageComponent>;
   let component: ApplicationsPageComponent;
   let applicationService: { list: ReturnType<typeof vi.fn> };
+  let companyService: { list: ReturnType<typeof vi.fn> };
+  let router: Router;
 
   const application: JobApplication = {
     id: 12,
@@ -36,12 +39,16 @@ describe('ApplicationsPageComponent', () => {
     applicationService = {
       list: vi.fn(() => of(paginated([application], 1))),
     };
+    companyService = {
+      list: vi.fn(() => of(companyPage())),
+    };
 
     await TestBed.configureTestingModule({
       imports: [ApplicationsPageComponent],
       providers: [
         provideRouter([]),
         { provide: JobApplicationService, useValue: applicationService },
+        { provide: CompanyService, useValue: companyService },
         {
           provide: ApiErrorService,
           useValue: { lastError: signal(null), clear: vi.fn() },
@@ -52,11 +59,18 @@ describe('ApplicationsPageComponent', () => {
 
     fixture = TestBed.createComponent(ApplicationsPageComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
   it('loads the first Laravel pagination page', () => {
-    expect(applicationService.list).toHaveBeenCalledWith({ page: 1, per_page: 10 });
+    expect(applicationService.list).toHaveBeenCalledWith({
+      page: 1,
+      per_page: 10,
+      sort: 'created_at',
+      direction: 'desc',
+    });
+    expect(companyService.list).toHaveBeenCalledWith({ page: 1, per_page: 100 });
     expect(component.applications()).toEqual([application]);
     expect(component.total()).toBe(21);
     expect(component.currentPage()).toBe(1);
@@ -64,13 +78,121 @@ describe('ApplicationsPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Northstar Labs');
   });
 
-  it('loads the page selected in the shared paginator', () => {
+  it('keeps the selected page in the URL and loads it', async () => {
     applicationService.list.mockReturnValueOnce(of(paginated([application], 2)));
 
     component.handlePageChange({ pageIndex: 1, pageSize: 10, length: 21 });
+    await fixture.whenStable();
 
-    expect(applicationService.list).toHaveBeenLastCalledWith({ page: 2, per_page: 10 });
+    expect(router.url).toBe('/?page=2');
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 2,
+      per_page: 10,
+      sort: 'created_at',
+      direction: 'desc',
+    });
     expect(component.currentPage()).toBe(2);
+  });
+
+  it('combines filters and sorting in the URL and API request', async () => {
+    component.searchTerm = '  angular  ';
+    component.selectedStatus = 'interview';
+    component.selectedWorkMode = 'remote';
+    component.selectedCompanyId = 4;
+    component.selectedSort = 'position';
+    component.selectedDirection = 'asc';
+
+    component.applyFilters();
+    await fixture.whenStable();
+
+    expect(router.url).toBe(
+      '/?search=angular&status=interview&work_mode=remote&company_id=4&sort=position&direction=asc',
+    );
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 1,
+      per_page: 10,
+      search: 'angular',
+      status: 'interview',
+      work_mode: 'remote',
+      company_id: 4,
+      sort: 'position',
+      direction: 'asc',
+    });
+    expect(component.emptyMessage).toBe('No applications match your filters.');
+  });
+
+  it('restores filters, sorting and pagination from the URL', async () => {
+    applicationService.list.mockReturnValueOnce(of(paginated([application], 2)));
+
+    await router.navigateByUrl(
+      '/?search=backend&status=offer&work_mode=hybrid&company_id=4&sort=applied_at&direction=asc&page=2',
+    );
+    await fixture.whenStable();
+
+    expect(component.searchTerm).toBe('backend');
+    expect(component.selectedStatus).toBe('offer');
+    expect(component.selectedWorkMode).toBe('hybrid');
+    expect(component.selectedCompanyId).toBe(4);
+    expect(component.selectedSort).toBe('applied_at');
+    expect(component.selectedDirection).toBe('asc');
+    expect(component.currentPage()).toBe(2);
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 2,
+      per_page: 10,
+      search: 'backend',
+      status: 'offer',
+      work_mode: 'hybrid',
+      company_id: 4,
+      sort: 'applied_at',
+      direction: 'asc',
+    });
+  });
+
+  it('debounces search before updating the URL', async () => {
+    vi.useFakeTimers();
+    const initialCallCount = applicationService.list.mock.calls.length;
+
+    component.handleSearchChange('angular');
+    vi.advanceTimersByTime(299);
+    expect(applicationService.list).toHaveBeenCalledTimes(initialCallCount);
+
+    vi.advanceTimersByTime(1);
+    await vi.runAllTimersAsync();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/?search=angular');
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 1,
+      per_page: 10,
+      search: 'angular',
+      sort: 'created_at',
+      direction: 'desc',
+    });
+    vi.useRealTimers();
+  });
+
+  it('resets filters, sorting and pagination to their defaults', async () => {
+    component.searchTerm = 'angular';
+    component.selectedStatus = 'offer';
+    component.selectedCompanyId = 4;
+    component.selectedSort = 'position';
+    component.selectedDirection = 'asc';
+    component.currentPage.set(3);
+    component.applyFilters();
+    await fixture.whenStable();
+
+    component.resetFilters();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/');
+    expect(component.hasActiveFilters).toBe(false);
+    expect(component.currentPage()).toBe(1);
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 1,
+      per_page: 10,
+      sort: 'created_at',
+      direction: 'desc',
+    });
   });
 
   it('exposes a distinct error state when loading fails', () => {
@@ -99,6 +221,33 @@ function paginated(data: JobApplication[], currentPage: number) {
       per_page: 10,
       to: currentPage * 10,
       total: 21,
+    },
+  };
+}
+
+function companyPage() {
+  return {
+    data: [
+      {
+        id: 4,
+        name: 'Northstar Labs',
+        website: null,
+        location: null,
+        notes: null,
+        created_at: '2026-09-12T10:00:00Z',
+        updated_at: '2026-09-12T10:00:00Z',
+      },
+    ],
+    links: { first: null, last: null, prev: null, next: null },
+    meta: {
+      current_page: 1,
+      from: 1,
+      last_page: 1,
+      links: [],
+      path: '/api/v1/companies',
+      per_page: 100,
+      to: 1,
+      total: 1,
     },
   };
 }

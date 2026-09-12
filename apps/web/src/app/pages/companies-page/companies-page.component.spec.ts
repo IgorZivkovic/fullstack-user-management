@@ -1,6 +1,7 @@
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ApiOperationError } from '../../models/api.model';
 import { Company } from '../../models/job-tracker.model';
@@ -19,6 +20,7 @@ describe('CompaniesPageComponent', () => {
   };
   let apiError: WritableSignal<ApiOperationError | null>;
   let snackBar: { open: ReturnType<typeof vi.fn> };
+  let router: Router;
 
   const company: Company = {
     id: 1,
@@ -43,6 +45,7 @@ describe('CompaniesPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [CompaniesPageComponent],
       providers: [
+        provideRouter([]),
         { provide: CompanyService, useValue: companyService },
         {
           provide: ApiErrorService,
@@ -54,6 +57,7 @@ describe('CompaniesPageComponent', () => {
 
     fixture = TestBed.createComponent(CompaniesPageComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
@@ -79,18 +83,49 @@ describe('CompaniesPageComponent', () => {
     expect(component.dialogVisible()).toBe(false);
   });
 
-  it('debounces company search and restarts pagination', () => {
+  it('debounces company search and stores it in the URL', async () => {
     vi.useFakeTimers();
 
     component.handleSearchChange('  berlin  ');
-    vi.advanceTimersByTime(300);
+    vi.advanceTimersByTime(299);
+    expect(companyService.list).toHaveBeenCalledTimes(1);
 
+    vi.advanceTimersByTime(1);
+    await vi.runAllTimersAsync();
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/?search=berlin');
     expect(companyService.list).toHaveBeenLastCalledWith({
       page: 1,
       per_page: 10,
-      search: '  berlin  ',
+      search: 'berlin',
     });
     vi.useRealTimers();
+  });
+
+  it('restores company search and pagination from the URL', async () => {
+    companyService.list.mockReturnValueOnce(of(paginated([company], 2, 11)));
+
+    await router.navigateByUrl('/?search=northstar&page=2');
+    await fixture.whenStable();
+
+    expect(component.searchTerm).toBe('northstar');
+    expect(component.currentPage()).toBe(2);
+    expect(companyService.list).toHaveBeenLastCalledWith({
+      page: 2,
+      per_page: 10,
+      search: 'northstar',
+    });
+  });
+
+  it('stores paginator changes in the URL', async () => {
+    companyService.list.mockReturnValueOnce(of(paginated([company], 2, 11)));
+
+    component.handlePageChange({ pageIndex: 1, pageSize: 10, length: 11 });
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/?page=2');
+    expect(component.currentPage()).toBe(2);
   });
 
   it('updates the selected company', () => {
@@ -143,19 +178,19 @@ describe('CompaniesPageComponent', () => {
   });
 });
 
-function paginated(data: Company[]) {
+function paginated(data: Company[], currentPage = 1, total = data.length) {
   return {
     data,
     links: { first: null, last: null, prev: null, next: null },
     meta: {
-      current_page: 1,
-      from: data.length === 0 ? null : 1,
-      last_page: 1,
+      current_page: currentPage,
+      from: data.length === 0 ? null : (currentPage - 1) * 10 + 1,
+      last_page: Math.max(1, Math.ceil(total / 10)),
       links: [],
       path: '/api/v1/companies',
       per_page: 10,
-      to: data.length === 0 ? null : data.length,
-      total: data.length,
+      to: data.length === 0 ? null : (currentPage - 1) * 10 + data.length,
+      total,
     },
   };
 }
