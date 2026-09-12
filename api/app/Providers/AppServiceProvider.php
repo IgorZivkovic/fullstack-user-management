@@ -6,7 +6,7 @@ use App\Models\Company;
 use App\Models\Interview;
 use App\Models\JobApplication;
 use App\Models\User;
-use App\OpenApi\UserManagementApiDocumentation;
+use App\OpenApi\ApplicationApiDocumentation;
 use App\Policies\CompanyPolicy;
 use App\Policies\InterviewPolicy;
 use App\Policies\JobApplicationPolicy;
@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
 
                 return count($methods) === 1 ? $methods[0] : $methods;
             })
-            ->withDocumentTransformers(UserManagementApiDocumentation::class);
+            ->withDocumentTransformers(ApplicationApiDocumentation::class);
 
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(
             config('auth.login_rate_limit'),

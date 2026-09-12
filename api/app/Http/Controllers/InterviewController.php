@@ -13,6 +13,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InterviewController extends Controller
 {
+    /**
+     * List interviews for an owned job application.
+     *
+     * Results are sorted chronologically by scheduled time.
+     */
     public function index(JobApplication $jobApplication): AnonymousResourceCollection
     {
         $interviews = $jobApplication->interviews()
@@ -23,6 +28,11 @@ class InterviewController extends Controller
         return InterviewResource::collection($interviews);
     }
 
+    /**
+     * Schedule an interview.
+     *
+     * The parent job application must belong to the authenticated account.
+     */
     public function store(
         StoreInterviewRequest $request,
         JobApplication $jobApplication,
@@ -34,6 +44,11 @@ class InterviewController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    /**
+     * Update an interview.
+     *
+     * The interview must belong to both the authenticated account and the application in the URL.
+     */
     public function update(
         UpdateInterviewRequest $request,
         JobApplication $jobApplication,
@@ -44,6 +59,11 @@ class InterviewController extends Controller
         return new InterviewResource($interview->refresh());
     }
 
+    /**
+     * Delete an interview.
+     *
+     * The interview must belong to the application in the URL.
+     */
     public function destroy(
         JobApplication $jobApplication,
         Interview $interview,

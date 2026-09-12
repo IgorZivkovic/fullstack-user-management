@@ -15,6 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JobApplicationController extends Controller
 {
+    /**
+     * List owned job applications.
+     *
+     * Returns Laravel pagination metadata and company summaries. Supports search, filters and whitelisted sorting.
+     */
     public function index(ListJobApplicationsRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
@@ -53,6 +58,11 @@ class JobApplicationController extends Controller
         return JobApplicationResource::collection($applications);
     }
 
+    /**
+     * Get an owned job application.
+     *
+     * Includes the company summary and interviews sorted by their scheduled time.
+     */
     public function show(JobApplication $jobApplication): JobApplicationResource
     {
         return new JobApplicationResource($jobApplication->load([
@@ -63,6 +73,11 @@ class JobApplicationController extends Controller
         ]));
     }
 
+    /**
+     * Create a job application.
+     *
+     * The selected company must belong to the authenticated account.
+     */
     public function store(StoreJobApplicationRequest $request): JsonResponse
     {
         $data = $request->validated();
@@ -79,6 +94,11 @@ class JobApplicationController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    /**
+     * Update an owned job application.
+     *
+     * Only supplied fields are changed. A replacement company must belong to the same account.
+     */
     public function update(
         UpdateJobApplicationRequest $request,
         JobApplication $jobApplication,
@@ -100,6 +120,11 @@ class JobApplicationController extends Controller
         );
     }
 
+    /**
+     * Delete an owned job application.
+     *
+     * Associated interviews are deleted with the application.
+     */
     public function destroy(JobApplication $jobApplication): JsonResponse
     {
         $jobApplication->delete();

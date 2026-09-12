@@ -13,6 +13,11 @@ class JobTrackerDashboardController extends Controller
 {
     private const SUMMARY_LIMIT = 5;
 
+    /**
+     * Get the Job Tracker dashboard.
+     *
+     * Returns account-scoped status totals, the five most recent applications and the next five pending interviews.
+     */
     public function __invoke(Request $request): JobTrackerDashboardResource
     {
         /** @var AuthUser $authUser */

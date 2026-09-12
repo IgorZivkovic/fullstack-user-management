@@ -17,7 +17,7 @@ use Dedoc\Scramble\Support\Generator\Types\IntegerType;
 use Dedoc\Scramble\Support\Generator\Types\ObjectType;
 use Dedoc\Scramble\Support\Generator\Types\StringType;
 
-final class UserManagementApiDocumentation implements DocumentTransformer
+final class ApplicationApiDocumentation implements DocumentTransformer
 {
     private const SESSION_SCHEME = 'sanctumSession';
 
@@ -43,6 +43,10 @@ final class UserManagementApiDocumentation implements DocumentTransformer
         $document->tags = [
             new Tag('Health', 'Service availability.'),
             new Tag('Authentication', 'Sanctum CSRF, login, session and logout endpoints.'),
+            new Tag('Dashboard', 'Account-scoped Job Tracker summaries.'),
+            new Tag('Companies', 'Companies owned by the authenticated account.'),
+            new Tag('Job Applications', 'Private job application tracking and search.'),
+            new Tag('Interviews', 'Interview scheduling within an owned job application.'),
             new Tag('Users', 'Authenticated user directory operations with role-based writes.'),
         ];
     }
@@ -81,7 +85,7 @@ final class UserManagementApiDocumentation implements DocumentTransformer
             ->addProperty('statusCode', new IntegerType)
             ->addProperty('errorCode', (new StringType)->examples(['VALIDATION_ERROR']))
             ->addProperty('timestamp', (new StringType)->format('date-time'))
-            ->addProperty('path', (new StringType)->examples(['/api/v1/users']))
+            ->addProperty('path', (new StringType)->examples(['/api/v1/job-applications']))
             ->addProperty('message', (new StringType)->examples(['Validation failed']))
             ->addProperty('details', $details)
             ->setRequired(['statusCode', 'errorCode', 'timestamp', 'path', 'message']);
@@ -110,6 +114,10 @@ final class UserManagementApiDocumentation implements DocumentTransformer
         return match (true) {
             $path === 'api/v1/health' => 'Health',
             $path === 'sanctum/csrf-cookie', str_starts_with($path, 'api/v1/auth/') => 'Authentication',
+            $path === 'api/v1/dashboard' => 'Dashboard',
+            str_starts_with($path, 'api/v1/companies') => 'Companies',
+            str_contains($path, '/interviews') => 'Interviews',
+            str_starts_with($path, 'api/v1/job-applications') => 'Job Applications',
             default => 'Users',
         };
     }
@@ -150,19 +158,54 @@ final class UserManagementApiDocumentation implements DocumentTransformer
             return [401, 422, 429, 500];
         }
 
+        $method = strtolower($method);
         $statuses = [401, 500];
 
         if (str_starts_with($path, 'api/v1/users')) {
             $statuses[] = 403;
 
-            if ($path === 'api/v1/users' && in_array(strtolower($method), ['get', 'post'], true)) {
+            if ($path === 'api/v1/users' && in_array($method, ['get', 'post'], true)) {
                 $statuses[] = 422;
             }
 
             if ($path === 'api/v1/users/{user}') {
                 $statuses[] = 404;
 
-                if (in_array(strtolower($method), ['put', 'patch'], true)) {
+                if (in_array($method, ['put', 'patch'], true)) {
+                    $statuses[] = 422;
+                }
+            }
+        }
+
+        if (str_starts_with($path, 'api/v1/companies')) {
+            if ($path === 'api/v1/companies') {
+                $statuses[] = 422;
+            } else {
+                $statuses[] = 404;
+
+                if (in_array($method, ['put', 'patch'], true)) {
+                    $statuses[] = 422;
+                }
+
+                if ($method === 'delete') {
+                    $statuses[] = 409;
+                }
+            }
+        }
+
+        if (str_starts_with($path, 'api/v1/job-applications')) {
+            if (str_contains($path, '/interviews')) {
+                $statuses[] = 404;
+
+                if (in_array($method, ['post', 'put', 'patch'], true)) {
+                    $statuses[] = 422;
+                }
+            } elseif ($path === 'api/v1/job-applications') {
+                $statuses[] = 422;
+            } else {
+                $statuses[] = 404;
+
+                if (in_array($method, ['put', 'patch'], true)) {
                     $statuses[] = 422;
                 }
             }
@@ -191,7 +234,8 @@ final class UserManagementApiDocumentation implements DocumentTransformer
         return match ($status) {
             401 => 'Unauthenticated or invalid credentials.',
             403 => 'Authenticated user does not have permission for this action.',
-            404 => 'Requested user was not found.',
+            404 => 'Requested resource was not found or is not owned by the authenticated account.',
+            409 => 'The request conflicts with the current resource state.',
             422 => 'Request validation failed.',
             429 => 'Too many login attempts.',
             default => 'Unexpected server error.',

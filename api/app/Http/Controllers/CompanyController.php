@@ -17,6 +17,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CompanyController extends Controller
 {
+    /**
+     * List owned companies.
+     *
+     * Returns Laravel pagination metadata. Results can be searched by company name or location.
+     */
     public function index(ListCompaniesRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
@@ -43,11 +48,21 @@ class CompanyController extends Controller
         return CompanyResource::collection($companies);
     }
 
+    /**
+     * Get an owned company.
+     *
+     * A company owned by another account is returned as not found.
+     */
     public function show(Company $company): CompanyResource
     {
         return new CompanyResource($company);
     }
 
+    /**
+     * Create a company.
+     *
+     * The company is always assigned to the authenticated account.
+     */
     public function store(StoreCompanyRequest $request): JsonResponse
     {
         /** @var AuthUser $authUser */
@@ -59,6 +74,11 @@ class CompanyController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
+    /**
+     * Update an owned company.
+     *
+     * Only supplied fields are changed.
+     */
     public function update(UpdateCompanyRequest $request, Company $company): CompanyResource
     {
         $company->update($request->validated());
@@ -66,6 +86,11 @@ class CompanyController extends Controller
         return new CompanyResource($company->refresh());
     }
 
+    /**
+     * Delete an owned company.
+     *
+     * A company with job applications cannot be deleted.
+     */
     public function destroy(Request $request, Company $company): JsonResponse
     {
         if ($company->jobApplications()->exists()) {
