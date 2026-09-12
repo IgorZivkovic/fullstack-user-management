@@ -1,9 +1,10 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { JobApplication } from '../../models/job-tracker.model';
+import { ApiOperationError } from '../../models/api.model';
+import { JobApplication, JobApplicationPayload } from '../../models/job-tracker.model';
 import { ApiErrorService } from '../../services/api-error.service';
 import { CompanyService } from '../../services/company.service';
 import { JobApplicationService } from '../../services/job-application.service';
@@ -12,9 +13,15 @@ import { ApplicationsPageComponent } from './applications-page.component';
 describe('ApplicationsPageComponent', () => {
   let fixture: ComponentFixture<ApplicationsPageComponent>;
   let component: ApplicationsPageComponent;
-  let applicationService: { list: ReturnType<typeof vi.fn> };
+  let applicationService: {
+    list: ReturnType<typeof vi.fn>;
+    create: ReturnType<typeof vi.fn>;
+    update: ReturnType<typeof vi.fn>;
+    remove: ReturnType<typeof vi.fn>;
+  };
   let companyService: { list: ReturnType<typeof vi.fn> };
   let router: Router;
+  let apiError: WritableSignal<ApiOperationError | null>;
 
   const application: JobApplication = {
     id: 12,
@@ -38,10 +45,14 @@ describe('ApplicationsPageComponent', () => {
   beforeEach(async () => {
     applicationService = {
       list: vi.fn(() => of(paginated([application], 1))),
+      create: vi.fn(() => of(application)),
+      update: vi.fn(() => of(application)),
+      remove: vi.fn(() => of({ deleted: true })),
     };
     companyService = {
       list: vi.fn(() => of(companyPage())),
     };
+    apiError = signal<ApiOperationError | null>(null);
 
     await TestBed.configureTestingModule({
       imports: [ApplicationsPageComponent],
@@ -51,7 +62,7 @@ describe('ApplicationsPageComponent', () => {
         { provide: CompanyService, useValue: companyService },
         {
           provide: ApiErrorService,
-          useValue: { lastError: signal(null), clear: vi.fn() },
+          useValue: { lastError: apiError.asReadonly(), clear: vi.fn(() => apiError.set(null)) },
         },
         { provide: MatSnackBar, useValue: { open: vi.fn() } },
       ],
@@ -195,6 +206,73 @@ describe('ApplicationsPageComponent', () => {
     });
   });
 
+  it('creates an application and refreshes without losing filters', async () => {
+    await router.navigateByUrl('/?status=applied&company_id=4');
+    await fixture.whenStable();
+    component.openCreate();
+
+    component.saveApplication(payload());
+
+    expect(applicationService.create).toHaveBeenCalledWith(payload());
+    expect(component.dialogVisible()).toBe(false);
+    expect(router.url).toBe('/?status=applied&company_id=4');
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 1,
+      per_page: 10,
+      status: 'applied',
+      company_id: 4,
+      sort: 'created_at',
+      direction: 'desc',
+    });
+  });
+
+  it('updates the selected application', () => {
+    component.openEdit(application);
+
+    component.saveApplication(payload());
+
+    expect(applicationService.update).toHaveBeenCalledWith(application.id, payload());
+    expect(component.dialogVisible()).toBe(false);
+  });
+
+  it('shows backend validation errors beside form fields', () => {
+    applicationService.create.mockImplementationOnce(() => {
+      apiError.set({
+        message: 'Validation failed',
+        occurredAt: Date.now(),
+        fieldErrors: { salary_max: ['Salary maximum must not be lower than salary minimum.'] },
+      });
+      return throwError(() => new Error('Validation failed'));
+    });
+    component.openCreate();
+
+    component.saveApplication(payload());
+
+    expect(component.dialogVisible()).toBe(true);
+    expect(component.validationErrors()).toEqual({
+      salary_max: ['Salary maximum must not be lower than salary minimum.'],
+    });
+  });
+
+  it('deletes only after confirmation and refreshes the current filters', async () => {
+    await router.navigateByUrl('/?work_mode=remote');
+    await fixture.whenStable();
+    component.requestDelete(application);
+
+    component.confirmDelete();
+
+    expect(applicationService.remove).toHaveBeenCalledWith(application.id);
+    expect(component.confirmDeleteVisible()).toBe(false);
+    expect(router.url).toBe('/?work_mode=remote');
+    expect(applicationService.list).toHaveBeenLastCalledWith({
+      page: 1,
+      per_page: 10,
+      work_mode: 'remote',
+      sort: 'created_at',
+      direction: 'desc',
+    });
+  });
+
   it('exposes a distinct error state when loading fails', () => {
     applicationService.list.mockReturnValueOnce(throwError(() => new Error('Network error')));
 
@@ -222,6 +300,23 @@ function paginated(data: JobApplication[], currentPage: number) {
       to: currentPage * 10,
       total: 21,
     },
+  };
+}
+
+function payload(): JobApplicationPayload {
+  return {
+    company_id: 4,
+    position: 'Angular Developer',
+    status: 'applied',
+    work_mode: 'remote',
+    employment_type: 'full-time',
+    source_url: null,
+    applied_at: '2026-09-10',
+    next_action_at: '2026-09-20',
+    salary_min: 60_000,
+    salary_max: 75_000,
+    currency: 'EUR',
+    notes: null,
   };
 }
 

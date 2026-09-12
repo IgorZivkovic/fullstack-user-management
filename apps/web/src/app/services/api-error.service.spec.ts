@@ -39,4 +39,24 @@ describe('ApiErrorService', () => {
     service.clear();
     expect(service.lastError()).toBeNull();
   });
+
+  it('keeps structured validation errors for forms', () => {
+    const error = new HttpErrorResponse({
+      status: 422,
+      error: {
+        statusCode: 422,
+        errorCode: 'VALIDATION_ERROR',
+        timestamp: '2026-09-12T10:00:00Z',
+        path: '/api/v1/job-applications',
+        message: 'Validation failed',
+        errors: { position: ['The position field is required.'] },
+      },
+    });
+
+    service.handle(error, 'Fallback message').subscribe({ error: () => undefined });
+
+    expect(service.lastError()?.fieldErrors).toEqual({
+      position: ['The position field is required.'],
+    });
+  });
 });

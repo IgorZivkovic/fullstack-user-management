@@ -43,4 +43,6 @@ export class ApplicationTableComponent {
   @Input() pageSize = 10;
 
   @Output() pageChange = new EventEmitter<PageEvent>();
+  @Output() edit = new EventEmitter<JobApplication>();
+  @Output() remove = new EventEmitter<JobApplication>();
 }

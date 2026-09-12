@@ -66,6 +66,26 @@
         >
           <mat-icon class="action-icon" fontSet="material-symbols-outlined">visibility</mat-icon>
         </a>
+        <button
+          mat-icon-button
+          matTooltip="Edit"
+          class="edit-action"
+          type="button"
+          [attr.aria-label]="'Edit ' + application.position"
+          (click)="edit.emit(application)"
+        >
+          <mat-icon class="action-icon" fontSet="material-symbols-outlined">edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          matTooltip="Delete"
+          class="danger-action"
+          type="button"
+          [attr.aria-label]="'Delete ' + application.position"
+          (click)="remove.emit(application)"
+        >
+          <mat-icon class="action-icon" fontSet="material-symbols-outlined">delete</mat-icon>
+        </button>
       </div>
     </td>
   </ng-container>

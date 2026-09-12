@@ -41,9 +41,11 @@ export interface ApiErrorResponse {
   path: string;
   message: string;
   details?: string[];
+  errors?: Record<string, string[]>;
 }
 
 export interface ApiOperationError {
   message: string;
   occurredAt: number;
+  fieldErrors?: Record<string, string[]>;
 }

@@ -1,0 +1,167 @@
+@if (visible()) {
+  <div class="dialog-backdrop" (click)="close.emit()">
+    <section
+      class="dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dialog-header">
+        <h2>{{ title }}</h2>
+        <p>Track the opportunity, its current stage, and your next action.</p>
+      </header>
+
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Company</mat-label>
+          <mat-select formControlName="company_id">
+            @for (company of companies(); track company.id) {
+              <mat-option [value]="company.id">{{ company.name }}</mat-option>
+            }
+          </mat-select>
+          @if (serverError('company_id'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.company_id.touched && form.controls.company_id.invalid) {
+            <mat-error>Select a company.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <input matInput formControlName="position" autocomplete="off" />
+          @if (serverError('position'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.position.touched && form.controls.position.hasError('required')
+          ) {
+            <mat-error>Position is required.</mat-error>
+          } @else if (
+            form.controls.position.touched && form.controls.position.hasError('maxlength')
+          ) {
+            <mat-error>Position must be 160 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ status | titlecase }}</mat-option>
+            }
+          </mat-select>
+          @if (serverError('status'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Work mode</mat-label>
+          <mat-select formControlName="work_mode">
+            @for (workMode of workModes; track workMode) {
+              <mat-option [value]="workMode">{{ workMode | titlecase }}</mat-option>
+            }
+          </mat-select>
+          @if (serverError('work_mode'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Employment type</mat-label>
+          <input matInput formControlName="employment_type" placeholder="Full-time" />
+          @if (serverError('employment_type'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.employment_type.touched &&
+            form.controls.employment_type.hasError('maxlength')
+          ) {
+            <mat-error>Employment type must be 80 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Source URL</mat-label>
+          <input matInput formControlName="source_url" placeholder="https://example.com/job" />
+          @if (serverError('source_url'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.source_url.touched && form.controls.source_url.hasError('pattern')
+          ) {
+            <mat-error>Enter a complete HTTP or HTTPS URL.</mat-error>
+          } @else if (
+            form.controls.source_url.touched && form.controls.source_url.hasError('maxlength')
+          ) {
+            <mat-error>Source URL is too long.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Applied date</mat-label>
+          <input matInput type="date" formControlName="applied_at" />
+          @if (serverError('applied_at'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Next action date</mat-label>
+          <input matInput type="date" formControlName="next_action_at" />
+          @if (serverError('next_action_at'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Minimum salary</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="salary_min" />
+          @if (serverError('salary_min'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.salary_min.touched && form.controls.salary_min.invalid) {
+            <mat-error>Enter a valid non-negative salary.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Maximum salary</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="salary_max" />
+          @if (serverError('salary_max'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.salary_max.touched && form.controls.salary_max.invalid) {
+            <mat-error>Enter a valid non-negative salary.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Currency</mat-label>
+          <input matInput formControlName="currency" maxlength="3" placeholder="EUR" />
+          @if (serverError('currency'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.currency.touched && form.controls.currency.invalid) {
+            <mat-error>Use a three-letter currency code.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="4"></textarea>
+          <mat-hint align="end">{{ form.controls.notes.value.length }} / 10000</mat-hint>
+          @if (serverError('notes'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.notes.touched && form.controls.notes.invalid) {
+            <mat-error>Notes must be 10000 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <footer class="dialog-actions full-width">
+          <button mat-stroked-button type="button" [disabled]="saving()" (click)="close.emit()">
+            Cancel
+          </button>
+          <button mat-flat-button type="submit" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Saving...' : mode() === 'edit' ? 'Save changes' : 'Add application' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}

@@ -5,6 +5,14 @@
       <h1>Applications</h1>
       <p class="toolbar-subtitle">Review your current opportunities and next actions.</p>
     </div>
+    <button
+      mat-flat-button
+      type="button"
+      [disabled]="companiesLoading() || companies().length === 0"
+      (click)="openCreate()"
+    >
+      Add application
+    </button>
   </header>
 
   <section class="filters-card" aria-label="Application filters">
@@ -93,6 +101,29 @@
     [totalRecords]="total()"
     [pageIndex]="currentPage() - 1"
     [pageSize]="pageSize"
+    (edit)="openEdit($event)"
+    (remove)="requestDelete($event)"
     (pageChange)="handlePageChange($event)"
+  />
+
+  <app-application-dialog
+    [visible]="dialogVisible()"
+    [mode]="dialogMode()"
+    [application]="selectedApplication()"
+    [companies]="companies()"
+    [saving]="saving()"
+    [fieldErrors]="validationErrors()"
+    (close)="closeDialog()"
+    (save)="saveApplication($event)"
+  />
+
+  <app-confirm-dialog
+    [visible]="confirmDeleteVisible()"
+    [busy]="deleting()"
+    title="Delete application"
+    confirmLabel="Delete"
+    [message]="'Delete ' + (applicationPendingDelete()?.position ?? 'this application') + '?'"
+    (cancel)="cancelDelete()"
+    (confirm)="confirmDelete()"
   />
 </main>

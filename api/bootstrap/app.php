@@ -46,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'VALIDATION_ERROR',
                 'Validation failed',
                 collect($exception->errors())->flatten()->values()->all(),
+                $exception->errors(),
             );
         });
 

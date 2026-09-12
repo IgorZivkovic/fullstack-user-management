@@ -10,8 +10,13 @@ export class ApiErrorService {
   readonly lastError = this._lastError.asReadonly();
 
   handle(error: unknown, fallbackMessage: string): Observable<never> {
-    const message = this.extractMessage(error) ?? fallbackMessage;
-    this._lastError.set({ message, occurredAt: Date.now() });
+    const response = this.extractResponse(error);
+    const message = response?.message ?? fallbackMessage;
+    this._lastError.set({
+      message,
+      occurredAt: Date.now(),
+      ...(response?.errors ? { fieldErrors: response.errors } : {}),
+    });
 
     return throwError(() => error);
   }
@@ -20,12 +25,12 @@ export class ApiErrorService {
     this._lastError.set(null);
   }
 
-  private extractMessage(error: unknown): string | null {
+  private extractResponse(error: unknown): ApiErrorResponse | null {
     if (!(error instanceof HttpErrorResponse) || !this.isApiError(error.error)) {
       return null;
     }
 
-    return error.error.message;
+    return error.error;
   }
 
   private isApiError(value: unknown): value is ApiErrorResponse {

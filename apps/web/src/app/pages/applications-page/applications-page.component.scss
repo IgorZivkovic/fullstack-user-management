@@ -23,6 +23,8 @@
   padding: 1.5rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   box-sizing: border-box;
   background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
 
@@ -81,6 +83,15 @@
 @media (max-width: 560px) {
   .page {
     width: min(calc(100% - 1.5rem), 1100px);
+  }
+
+  .page-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-toolbar button {
+    width: 100%;
   }
 
   .filters-grid {

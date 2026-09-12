@@ -118,7 +118,8 @@ class ManageJobApplicationsTest extends TestCase
             ])
             ->assertUnprocessable()
             ->assertJsonPath('errorCode', 'VALIDATION_ERROR')
-            ->assertJsonCount(12, 'details');
+            ->assertJsonCount(12, 'details')
+            ->assertJsonStructure(['errors' => ['position', 'status', 'work_mode', 'salary_min']]);
     }
 
     public function test_salary_range_and_currency_are_validated_against_the_resulting_record(): void

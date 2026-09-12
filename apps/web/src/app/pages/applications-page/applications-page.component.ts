@@ -12,9 +12,16 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { ApplicationTableComponent } from '../../components/application-table/application-table.component';
 import {
+  ApplicationDialogComponent,
+  ApplicationDialogMode,
+  ApplicationFieldErrors,
+} from '../../components/application-dialog/application-dialog.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import {
   CompanySummary,
   JobApplication,
   JobApplicationFilters,
+  JobApplicationPayload,
   JobApplicationSortField,
   JobApplicationStatus,
   JOB_APPLICATION_STATUSES,
@@ -43,7 +50,9 @@ import {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    ApplicationDialogComponent,
     ApplicationTableComponent,
+    ConfirmDialogComponent,
   ],
   templateUrl: './applications-page.component.html',
   styleUrl: './applications-page.component.scss',
@@ -65,6 +74,14 @@ export class ApplicationsPageComponent {
   readonly loadFailed = signal(false);
   readonly total = signal(0);
   readonly currentPage = signal(1);
+  readonly dialogVisible = signal(false);
+  readonly dialogMode = signal<ApplicationDialogMode>('create');
+  readonly selectedApplication = signal<JobApplication | null>(null);
+  readonly saving = signal(false);
+  readonly validationErrors = signal<ApplicationFieldErrors>({});
+  readonly confirmDeleteVisible = signal(false);
+  readonly applicationPendingDelete = signal<JobApplication | null>(null);
+  readonly deleting = signal(false);
   readonly pageSize = 10;
   readonly statuses = JOB_APPLICATION_STATUSES;
   readonly workModes = WORK_MODES;
@@ -128,6 +145,107 @@ export class ApplicationsPageComponent {
   handleSearchChange(value: string): void {
     this.searchTerm = value;
     this.searchChanges.next(value.trim());
+  }
+
+  openCreate(): void {
+    this.selectedApplication.set(null);
+    this.dialogMode.set('create');
+    this.validationErrors.set({});
+    this.dialogVisible.set(true);
+  }
+
+  openEdit(application: JobApplication): void {
+    this.selectedApplication.set(application);
+    this.dialogMode.set('edit');
+    this.validationErrors.set({});
+    this.dialogVisible.set(true);
+  }
+
+  closeDialog(): void {
+    if (!this.saving()) {
+      this.dialogVisible.set(false);
+      this.validationErrors.set({});
+    }
+  }
+
+  saveApplication(payload: JobApplicationPayload): void {
+    this.apiErrors.clear();
+    this.validationErrors.set({});
+    this.saving.set(true);
+
+    const application = this.selectedApplication();
+    const request = application
+      ? this.applicationService.update(application.id, payload)
+      : this.applicationService.create(payload);
+
+    request
+      .pipe(
+        finalize(() => this.saving.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.dialogVisible.set(false);
+          this.snackBar.open(
+            application ? 'Application updated.' : 'Application added.',
+            'Dismiss',
+            {
+              duration: 3000,
+            },
+          );
+          this.loadApplications();
+        },
+        error: () => {
+          this.validationErrors.set(this.apiErrors.lastError()?.fieldErrors ?? {});
+        },
+      });
+  }
+
+  requestDelete(application: JobApplication): void {
+    this.applicationPendingDelete.set(application);
+    this.confirmDeleteVisible.set(true);
+  }
+
+  cancelDelete(): void {
+    if (this.deleting()) {
+      return;
+    }
+
+    this.confirmDeleteVisible.set(false);
+    this.applicationPendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const application = this.applicationPendingDelete();
+    if (!application || this.deleting()) {
+      return;
+    }
+
+    this.apiErrors.clear();
+    this.deleting.set(true);
+    this.applicationService
+      .remove(application.id)
+      .pipe(
+        finalize(() => this.deleting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.confirmDeleteVisible.set(false);
+          this.applicationPendingDelete.set(null);
+          this.snackBar.open('Application deleted.', 'Dismiss', { duration: 3000 });
+
+          const targetPage =
+            this.applications().length === 1 && this.currentPage() > 1
+              ? this.currentPage() - 1
+              : this.currentPage();
+          this.refreshPage(targetPage);
+        },
+        error: () => {
+          this.confirmDeleteVisible.set(false);
+          this.applicationPendingDelete.set(null);
+        },
+      });
   }
 
   applyFilters(): void {
@@ -201,6 +319,15 @@ export class ApplicationsPageComponent {
       queryParams: writeApplicationQueryState({ ...this.currentQueryState(), page }),
       replaceUrl: true,
     });
+  }
+
+  private refreshPage(page: number): void {
+    if (page !== this.currentPage()) {
+      this.updateQueryParams(page);
+      return;
+    }
+
+    this.loadApplications();
   }
 
   private currentQueryState(): ApplicationQueryState {
