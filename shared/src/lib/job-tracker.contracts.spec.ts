@@ -8,7 +8,9 @@ import {
   type Company,
   type Interview,
   type JobApplication,
+  type JobApplicationPayload,
   type JobApplicationFilters,
+  type JobTrackerDashboard,
 } from './job-tracker.contracts';
 
 describe('job tracker contracts', () => {
@@ -98,5 +100,30 @@ describe('job tracker contracts', () => {
       sort: 'applied_at',
       direction: 'desc',
     });
+  });
+
+  it('defines write payloads and the dashboard response', () => {
+    const payload: JobApplicationPayload = {
+      company_id: 1,
+      position: 'Laravel Developer',
+      status: 'applied',
+      work_mode: 'hybrid',
+    };
+    const dashboard: JobTrackerDashboard = {
+      total_applications: 0,
+      applications_by_status: {
+        saved: 0,
+        applied: 0,
+        interview: 0,
+        offer: 0,
+        rejected: 0,
+        withdrawn: 0,
+      },
+      recent_applications: [],
+      upcoming_interviews: [],
+    };
+
+    expect(payload.status).toBe('applied');
+    expect(dashboard.applications_by_status.saved).toBe(0);
   });
 });

@@ -76,6 +76,57 @@ export interface Interview {
   updated_at: string;
 }
 
+export interface JobApplicationDetail extends JobApplication {
+  interviews: Interview[];
+}
+
+export interface DashboardInterview extends Interview {
+  job_application: Pick<JobApplication, 'id' | 'position'> & {
+    company: CompanySummary;
+  };
+}
+
+export type JobApplicationStatusCounts = Record<JobApplicationStatus, number>;
+
+export interface JobTrackerDashboard {
+  total_applications: number;
+  applications_by_status: JobApplicationStatusCounts;
+  recent_applications: JobApplication[];
+  upcoming_interviews: DashboardInterview[];
+}
+
+export type CompanyPayload = Pick<Company, 'name' | 'website' | 'location' | 'notes'>;
+export type UpdateCompanyPayload = Partial<CompanyPayload>;
+
+export interface JobApplicationPayload {
+  company_id: number;
+  position: string;
+  status: JobApplicationStatus;
+  work_mode: WorkMode;
+  employment_type?: string | null;
+  source_url?: string | null;
+  applied_at?: string | null;
+  next_action_at?: string | null;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  currency?: string | null;
+  notes?: string | null;
+}
+
+export type UpdateJobApplicationPayload = Partial<JobApplicationPayload>;
+
+export interface InterviewPayload {
+  type: InterviewType;
+  scheduled_at: string;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  location_or_link?: string | null;
+  notes?: string | null;
+  outcome?: InterviewOutcome | null;
+}
+
+export type UpdateInterviewPayload = Partial<InterviewPayload>;
+
 export interface CompanyFilters {
   page?: number;
   per_page?: number;
