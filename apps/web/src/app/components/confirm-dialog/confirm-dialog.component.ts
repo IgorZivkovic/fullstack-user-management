@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, input } from '@angular/core';
-import { TuiButton } from '@taiga-ui/core';
+import { MatButtonModule } from '@angular/material/button';
 
 export type ConfirmDialogData = {
   title: string;
@@ -11,7 +11,7 @@ export type ConfirmDialogData = {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [TuiButton],
+  imports: [MatButtonModule],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
 })

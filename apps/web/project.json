@@ -23,18 +23,9 @@
           {
             "glob": "**/*",
             "input": "public"
-          },
-          {
-            "glob": "**/*.svg",
-            "input": "node_modules/@taiga-ui/icons/src",
-            "output": "assets/taiga-ui/icons"
           }
         ],
-        "styles": [
-          "node_modules/@taiga-ui/styles/taiga-ui-theme.less",
-          "node_modules/@taiga-ui/styles/taiga-ui-fonts.less",
-          "apps/web/src/styles.scss"
-        ],
+        "styles": ["apps/web/src/styles.scss"],
         "outputPath": "dist/web"
       },
       "configurations": {
@@ -42,7 +33,7 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "750kB",
+              "maximumWarning": "900kB",
               "maximumError": "1.5MB"
             },
             {
@@ -64,6 +55,9 @@
     },
     "serve": {
       "executor": "@angular/build:dev-server",
+      "options": {
+        "proxyConfig": "apps/web/proxy.conf.json"
+      },
       "configurations": {
         "production": {
           "buildTarget": "web:build:production"

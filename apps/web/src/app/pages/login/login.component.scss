@@ -35,12 +35,6 @@
   }
 }
 
-.form-field {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.field-error,
 .form-error {
   margin: 0;
   color: var(--app-danger);
@@ -61,4 +55,8 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+mat-form-field {
+  width: 100%;
 }

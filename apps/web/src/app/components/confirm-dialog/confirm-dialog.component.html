@@ -11,10 +11,10 @@
       <p>{{ message() }}</p>
 
       <div class="confirm-actions">
-        <button tuiButton size="s" appearance="outline" type="button" (click)="cancel.emit()">
+        <button mat-stroked-button type="button" (click)="cancel.emit()">
           {{ cancelLabel() }}
         </button>
-        <button tuiButton size="s" appearance="negative" type="button" (click)="confirm.emit()">
+        <button mat-flat-button class="danger-button" type="button" (click)="confirm.emit()">
           {{ confirmLabel() }}
         </button>
       </div>
