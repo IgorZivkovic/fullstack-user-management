@@ -13,7 +13,7 @@ describe('UserTableComponent empty state', () => {
     expect(component.emptyMessage).toBe('No users match your search or filters.');
   });
 
-  it('shows an initial loading message before users arrive', () => {
+  it('shows a loading message while users are being fetched', () => {
     component.loading = true;
 
     expect(component.emptyMessage).toBe('Loading users...');
@@ -22,7 +22,7 @@ describe('UserTableComponent empty state', () => {
   it('invites administrators to add the first user', () => {
     component.canManageUsers = true;
 
-    expect(component.emptyMessage).toBe('No users yet. Use "Add User" to create one.');
+    expect(component.emptyMessage).toBe('No users yet. Use "Add user" to create one.');
   });
 
   it('does not suggest an unavailable action to read-only users', () => {

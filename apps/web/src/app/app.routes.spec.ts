@@ -1,5 +1,6 @@
 import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
 import { routes } from './app.routes';
 
 describe('application routes', () => {
@@ -20,5 +21,12 @@ describe('application routes', () => {
   it('keeps the public landing and login routes outside the authenticated shell', () => {
     expect(routes.find((route) => route.path === '' && route.pathMatch === 'full')).toBeDefined();
     expect(routes.find((route) => route.path === 'login')).toBeDefined();
+  });
+
+  it('uses the real companies page instead of the job tracker placeholder', () => {
+    const shellRoute = routes.find((route) => route.component === AppShellComponent);
+    const companiesRoute = shellRoute?.children?.find((route) => route.path === 'companies');
+
+    expect(companiesRoute?.component).toBe(CompaniesPageComponent);
   });
 });

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,7 +10,14 @@ import { User } from '../../models/user.model';
 @Component({
   selector: 'app-user-table',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatPaginatorModule, MatTableModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatTooltipModule,
+  ],
   templateUrl: './user-table.component.html',
   styleUrl: './user-table.component.scss',
 })
@@ -43,7 +51,7 @@ export class UserTableComponent {
     }
 
     return this.canManageUsers
-      ? 'No users yet. Use "Add User" to create one.'
+      ? 'No users yet. Use "Add user" to create one.'
       : 'No users are available.';
   }
 

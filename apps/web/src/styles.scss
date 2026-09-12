@@ -34,8 +34,10 @@ html {
   --app-border: #d7deea;
   --app-text: #172033;
   --app-muted: #667085;
+  --app-placeholder: #98a2b3;
   --app-primary: #006adc;
   --app-danger: #d92d20;
+  --app-page-header-min-height: 126px;
 }
 
 html,
@@ -58,6 +60,37 @@ select {
 input:is(:-webkit-autofill, :autofill) {
   -webkit-text-fill-color: var(--app-text);
   box-shadow: 0 0 0 1000px var(--app-card-bg) inset;
+}
+
+.mat-mdc-form-field {
+  --mat-form-field-filled-label-text-color: var(--app-placeholder);
+  --mat-form-field-filled-hover-label-text-color: var(--app-placeholder);
+  --mat-form-field-filled-input-text-placeholder-color: var(--app-placeholder);
+  --mat-form-field-filled-input-text-color: var(--app-text);
+  --mat-form-field-outlined-label-text-color: var(--app-placeholder);
+  --mat-form-field-outlined-hover-label-text-color: var(--app-placeholder);
+  --mat-form-field-outlined-input-text-placeholder-color: var(--app-placeholder);
+  --mat-form-field-outlined-input-text-color: var(--app-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--app-placeholder);
+  opacity: 1;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
 .error-snackbar {

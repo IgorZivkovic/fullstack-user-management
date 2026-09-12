@@ -21,6 +21,7 @@ export class ConfirmDialogComponent {
   readonly message = input('');
   readonly confirmLabel = input('Confirm');
   readonly cancelLabel = input('Cancel');
+  readonly busy = input(false);
 
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();

@@ -11,11 +11,17 @@
       <p>{{ message() }}</p>
 
       <div class="confirm-actions">
-        <button mat-stroked-button type="button" (click)="cancel.emit()">
+        <button mat-stroked-button type="button" [disabled]="busy()" (click)="cancel.emit()">
           {{ cancelLabel() }}
         </button>
-        <button mat-flat-button class="danger-button" type="button" (click)="confirm.emit()">
-          {{ confirmLabel() }}
+        <button
+          mat-flat-button
+          class="danger-button"
+          type="button"
+          [disabled]="busy()"
+          (click)="confirm.emit()"
+        >
+          {{ busy() ? 'Deleting...' : confirmLabel() }}
         </button>
       </div>
     </section>

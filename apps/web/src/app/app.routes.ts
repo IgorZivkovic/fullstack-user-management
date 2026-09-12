@@ -5,6 +5,7 @@ import { UsersPageComponent } from './pages/users-page/users-page.component';
 import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { JobTrackerPlaceholderComponent } from './pages/job-tracker-placeholder/job-tracker-placeholder.component';
+import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, pathMatch: 'full' },
@@ -41,11 +42,7 @@ export const routes: Routes = [
       },
       {
         path: 'companies',
-        component: JobTrackerPlaceholderComponent,
-        data: {
-          title: 'Companies',
-          description: 'Manage the companies connected to your applications.',
-        },
+        component: CompaniesPageComponent,
       },
       { path: 'users', component: UsersPageComponent },
     ],

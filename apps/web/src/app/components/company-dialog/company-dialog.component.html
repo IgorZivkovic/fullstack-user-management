@@ -1,0 +1,66 @@
+@if (visible()) {
+  <div class="dialog-backdrop" (click)="close.emit()">
+    <section
+      class="dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dialog-header">
+        <h2>{{ title }}</h2>
+        <p>Keep the company details used across your applications.</p>
+      </header>
+
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" autocomplete="organization" />
+          @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+            <mat-error>Company name is required.</mat-error>
+          }
+          @if (form.controls.name.touched && form.controls.name.hasError('maxlength')) {
+            <mat-error>Company name must be 160 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Website</mat-label>
+          <input matInput formControlName="website" placeholder="https://example.com" />
+          @if (form.controls.website.touched && form.controls.website.hasError('pattern')) {
+            <mat-error>Enter a complete HTTP or HTTPS URL.</mat-error>
+          }
+          @if (form.controls.website.touched && form.controls.website.hasError('maxlength')) {
+            <mat-error>Website URL is too long.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" autocomplete="address-level2" />
+          @if (form.controls.location.touched && form.controls.location.hasError('maxlength')) {
+            <mat-error>Location must be 160 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="4"></textarea>
+          <mat-hint align="end">{{ form.controls.notes.value.length }} / 5000</mat-hint>
+          @if (form.controls.notes.touched && form.controls.notes.hasError('maxlength')) {
+            <mat-error>Notes must be 5000 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <footer class="dialog-actions">
+          <button mat-stroked-button type="button" [disabled]="saving()" (click)="close.emit()">
+            Cancel
+          </button>
+          <button mat-flat-button type="submit" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Saving...' : mode() === 'edit' ? 'Save changes' : 'Add company' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
