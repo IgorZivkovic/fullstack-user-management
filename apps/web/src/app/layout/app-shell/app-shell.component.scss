@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--app-page-bg);
+}
+
+.shell-header {
+  padding: 1rem 1.25rem 0;
+}
+
+.shell-header__content {
+  width: min(100%, 1200px);
+  min-height: 4.25rem;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-sizing: border-box;
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 1rem;
+  box-shadow: 0 14px 36px rgba(24, 39, 75, 0.07);
+}
+
+.brand {
+  color: var(--app-text);
+  font-size: 1.15rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.shell-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shell-nav a {
+  color: var(--app-muted);
+}
+
+.shell-nav .active-link {
+  color: var(--app-primary);
+  background: #eaf3ff;
+}
+
+.account-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.account-email {
+  max-width: 220px;
+  overflow: hidden;
+  color: var(--app-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell-main {
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .shell-header__content {
+    flex-wrap: wrap;
+  }
+
+  .shell-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell-header {
+    padding-inline: 0.75rem;
+  }
+
+  .account-email {
+    display: none;
+  }
+}

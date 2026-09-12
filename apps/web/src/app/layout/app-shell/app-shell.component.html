@@ -1,0 +1,30 @@
+<div class="app-shell">
+  <header class="shell-header">
+    <div class="shell-header__content">
+      <a class="brand" routerLink="/dashboard">Job Tracker</a>
+
+      <nav class="shell-nav" aria-label="Main navigation">
+        <a
+          mat-button
+          routerLink="/dashboard"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Dashboard
+        </a>
+        <a mat-button routerLink="/applications" routerLinkActive="active-link"> Applications </a>
+        <a mat-button routerLink="/companies" routerLinkActive="active-link">Companies</a>
+        <a mat-button routerLink="/users" routerLinkActive="active-link">Users</a>
+      </nav>
+
+      <div class="account-actions">
+        <span class="account-email">{{ currentUser()?.email }}</span>
+        <button mat-stroked-button type="button" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell-main">
+    <router-outlet />
+  </main>
+</div>

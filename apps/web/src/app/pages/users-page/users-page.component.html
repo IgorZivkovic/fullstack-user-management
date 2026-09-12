@@ -1,30 +1,24 @@
-<header class="page-toolbar">
-  <div class="toolbar-content">
-    <div class="toolbar-copy">
-      <span class="toolbar-title">Users</span>
-      <span class="toolbar-subtitle">
-        {{
-          canManageUsers()
-            ? 'Administrator access: add, edit, view, and delete users.'
-            : 'Read-only access: view and filter users.'
-        }}
-      </span>
-    </div>
-
-    <span class="toolbar-spacer"></span>
-
-    @if (canManageUsers()) {
-      <button mat-flat-button type="button" (click)="openAdd()">Add User</button>
-    }
-    <button mat-stroked-button type="button" (click)="handleLogout()">Logout</button>
-  </div>
-</header>
-
 <main class="page">
-  <a routerLink="/" class="back-link">
-    <span aria-hidden="true">&larr;</span>
-    Back to Landing Page
-  </a>
+  <header class="page-toolbar">
+    <div class="toolbar-content">
+      <div class="toolbar-copy">
+        <span class="toolbar-title">Users</span>
+        <span class="toolbar-subtitle">
+          {{
+            canManageUsers()
+              ? 'Administrator access: add, edit, view, and delete users.'
+              : 'Read-only access: view and filter users.'
+          }}
+        </span>
+      </div>
+
+      <span class="toolbar-spacer"></span>
+
+      @if (canManageUsers()) {
+        <button mat-flat-button type="button" (click)="openAdd()">Add User</button>
+      }
+    </div>
+  </header>
 
   <section class="filters-card" aria-label="User filters">
     <div class="filters-row">

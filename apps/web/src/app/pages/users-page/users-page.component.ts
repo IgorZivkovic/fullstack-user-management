@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
@@ -29,7 +28,6 @@ import { AuthService } from '../../services/auth.service';
     MatInputModule,
     MatProgressBarModule,
     MatSelectModule,
-    RouterLink,
     UserTableComponent,
     UserDialogComponent,
     ConfirmDialogComponent,
@@ -43,7 +41,6 @@ export class UsersPageComponent {
   private readonly userService = inject(UserService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchChanges = new Subject<string>();
 
@@ -192,17 +189,6 @@ export class UsersPageComponent {
     }
 
     this.cancelDelete();
-  }
-
-  handleLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.router.navigate(['/login']);
-      },
-    });
   }
 
   handleSearchChange(value: string): void {
