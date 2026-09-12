@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\JobApplicationStatus;
 use App\Enums\WorkMode;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class JobApplication extends Model
 {
     use HasFactory;
+
+    public function scopeOwnedBy(Builder $query, AuthUser $authUser): Builder
+    {
+        return $query->whereHas(
+            'company',
+            fn (Builder $companyQuery) => $companyQuery->where('auth_user_id', $authUser->getKey()),
+        );
+    }
 
     public function company(): BelongsTo
     {
