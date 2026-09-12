@@ -32,6 +32,7 @@ class JobApplicationResource extends JsonResource
             'salary_max' => $this->salary_max === null ? null : (float) $this->salary_max,
             'currency' => $this->currency,
             'notes' => $this->notes,
+            'interviews' => InterviewResource::collection($this->whenLoaded('interviews')),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
         ];

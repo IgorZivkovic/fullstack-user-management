@@ -55,7 +55,12 @@ class JobApplicationController extends Controller
 
     public function show(JobApplication $jobApplication): JobApplicationResource
     {
-        return new JobApplicationResource($jobApplication->load('company:id,name'));
+        return new JobApplicationResource($jobApplication->load([
+            'company:id,name',
+            'interviews' => fn ($query) => $query
+                ->orderBy('scheduled_at')
+                ->orderBy('id'),
+        ]));
     }
 
     public function store(StoreJobApplicationRequest $request): JsonResponse
