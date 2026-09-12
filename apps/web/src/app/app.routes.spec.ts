@@ -1,5 +1,6 @@
 import { authGuard } from './guards/auth.guard';
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { ApplicationDetailsPageComponent } from './pages/application-details-page/application-details-page.component';
 import { ApplicationsPageComponent } from './pages/applications-page/applications-page.component';
 import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
 import { JobTrackerPlaceholderComponent } from './pages/job-tracker-placeholder/job-tracker-placeholder.component';
@@ -34,7 +35,7 @@ describe('application routes', () => {
     expect(await companiesRoute?.loadComponent?.()).toBe(CompaniesPageComponent);
   });
 
-  it('lazy-loads feature pages while keeping the details placeholder', async () => {
+  it('lazy-loads the job tracker feature pages', async () => {
     const shellRoute = routes.find((route) => route.component === AppShellComponent);
     const applicationsRoute = shellRoute?.children?.find((route) => route.path === 'applications');
     const detailsRoute = shellRoute?.children?.find((route) => route.path === 'applications/:id');
@@ -42,7 +43,7 @@ describe('application routes', () => {
     const usersRoute = shellRoute?.children?.find((route) => route.path === 'users');
 
     expect(await applicationsRoute?.loadComponent?.()).toBe(ApplicationsPageComponent);
-    expect(await detailsRoute?.loadComponent?.()).toBe(JobTrackerPlaceholderComponent);
+    expect(await detailsRoute?.loadComponent?.()).toBe(ApplicationDetailsPageComponent);
     expect(await dashboardRoute?.loadComponent?.()).toBe(JobTrackerPlaceholderComponent);
     expect(await usersRoute?.loadComponent?.()).toBe(UsersPageComponent);
   });

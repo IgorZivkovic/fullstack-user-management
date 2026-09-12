@@ -34,13 +34,9 @@ export const routes: Routes = [
       {
         path: 'applications/:id',
         loadComponent: () =>
-          import('./pages/job-tracker-placeholder/job-tracker-placeholder.component').then(
-            (module) => module.JobTrackerPlaceholderComponent,
+          import('./pages/application-details-page/application-details-page.component').then(
+            (module) => module.ApplicationDetailsPageComponent,
           ),
-        data: {
-          title: 'Application details',
-          description: 'Application details and the interview timeline will appear here.',
-        },
       },
       {
         path: 'companies',

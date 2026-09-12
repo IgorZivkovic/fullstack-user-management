@@ -1,0 +1,117 @@
+@if (visible()) {
+  <div class="dialog-backdrop" (click)="close.emit()">
+    <section
+      class="dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dialog-header">
+        <h2>{{ title }}</h2>
+        <p>Record the interview schedule, contact details, and outcome.</p>
+      </header>
+
+      <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Interview type</mat-label>
+          <mat-select formControlName="type">
+            @for (type of types; track type) {
+              <mat-option [value]="type">{{ type | titlecase }}</mat-option>
+            }
+          </mat-select>
+          @if (serverError('type'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Scheduled for</mat-label>
+          <input matInput type="datetime-local" formControlName="scheduled_at" />
+          @if (serverError('scheduled_at'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.scheduled_at.touched && form.controls.scheduled_at.hasError('required')
+          ) {
+            <mat-error>Choose the interview date and time.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contact name</mat-label>
+          <input matInput formControlName="contact_name" autocomplete="name" />
+          @if (serverError('contact_name'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.contact_name.touched && form.controls.contact_name.invalid) {
+            <mat-error>Contact name must be 160 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contact email</mat-label>
+          <input matInput type="email" formControlName="contact_email" autocomplete="email" />
+          @if (serverError('contact_email'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.contact_email.touched && form.controls.contact_email.hasError('email')
+          ) {
+            <mat-error>Enter a valid email address.</mat-error>
+          } @else if (
+            form.controls.contact_email.touched && form.controls.contact_email.hasError('maxlength')
+          ) {
+            <mat-error>Contact email must be 160 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Location or meeting link</mat-label>
+          <input
+            matInput
+            formControlName="location_or_link"
+            placeholder="Office address or https://meet.example.com/..."
+          />
+          @if (serverError('location_or_link'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (
+            form.controls.location_or_link.touched && form.controls.location_or_link.invalid
+          ) {
+            <mat-error>Location or link is too long.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Outcome</mat-label>
+          <mat-select formControlName="outcome">
+            <mat-option [value]="null">Pending</mat-option>
+            @for (outcome of outcomes; track outcome) {
+              <mat-option [value]="outcome">{{ outcome | titlecase }}</mat-option>
+            }
+          </mat-select>
+          @if (serverError('outcome'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Notes</mat-label>
+          <textarea matInput formControlName="notes" rows="4"></textarea>
+          <mat-hint align="end">{{ form.controls.notes.value.length }} / 10000</mat-hint>
+          @if (serverError('notes'); as error) {
+            <mat-error>{{ error }}</mat-error>
+          } @else if (form.controls.notes.touched && form.controls.notes.invalid) {
+            <mat-error>Notes must be 10000 characters or fewer.</mat-error>
+          }
+        </mat-form-field>
+
+        <footer class="dialog-actions full-width">
+          <button mat-stroked-button type="button" [disabled]="saving()" (click)="close.emit()">
+            Cancel
+          </button>
+          <button mat-flat-button type="submit" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Saving...' : mode() === 'edit' ? 'Save changes' : 'Schedule interview' }}
+          </button>
+        </footer>
+      </form>
+    </section>
+  </div>
+}
