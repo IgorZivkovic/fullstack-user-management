@@ -2,8 +2,12 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Laravel REST API for a full-stack job application tracker.",
+    "keywords": [
+        "laravel",
+        "job-tracker",
+        "rest-api"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",

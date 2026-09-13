@@ -14,10 +14,10 @@ class DatabaseSeederTest extends TestCase
     {
         $this->artisan('migrate:fresh --seed')->assertSuccessful();
 
-        $this->assertDatabaseCount('users', 60);
+        $this->assertDatabaseCount('users', 12);
         $this->assertDatabaseCount('auth_users', 2);
         $this->assertDatabaseCount('companies', 15);
-        $this->assertDatabaseCount('job_applications', 18);
+        $this->assertDatabaseCount('job_applications', 26);
         $this->assertDatabaseCount('interviews', 12);
 
         $admin = AuthUser::query()->where('email', 'admin@example.com')->firstOrFail();
@@ -38,7 +38,7 @@ class DatabaseSeederTest extends TestCase
         $this->assertCount(15, $adminApplications);
         $this->assertCount(9, $adminApplications->flatMap->interviews);
         $this->assertCount(3, $viewer->companies);
-        $this->assertCount(3, $viewerApplications);
+        $this->assertCount(11, $viewerApplications);
         $this->assertCount(3, $viewerApplications->flatMap->interviews);
     }
 

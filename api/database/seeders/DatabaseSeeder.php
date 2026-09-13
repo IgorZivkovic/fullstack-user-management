@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         fake()->seed(42);
 
-        User::factory()->count(60)->create();
+        User::factory()->count(12)->create();
 
         AuthUser::factory()->admin()->create([
             'email' => 'admin@example.com',
