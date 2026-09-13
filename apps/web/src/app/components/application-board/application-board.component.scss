@@ -1,9 +1,12 @@
 :host {
   display: block;
+  min-width: 0;
 }
 
 .board-section {
+  min-width: 0;
   padding: 1.25rem;
+  box-sizing: border-box;
   background: var(--app-card-bg);
   border: 1px solid var(--app-border);
   border-radius: 1rem;
@@ -54,7 +57,7 @@
 .board {
   overflow-x: auto;
   display: grid;
-  grid-template-columns: repeat(6, minmax(230px, 1fr));
+  grid-template-columns: repeat(6, minmax(165px, 1fr));
   gap: 0.8rem;
   padding-bottom: 0.25rem;
 }
@@ -137,6 +140,7 @@
 }
 
 .application-card {
+  min-width: 0;
   padding: 0.85rem;
   display: grid;
   gap: 0.8rem;
@@ -161,32 +165,33 @@
 
 .company-name {
   margin: 0.25rem 0 0;
-  overflow: hidden;
   color: var(--app-muted);
   font-size: 0.8rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .application-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
   color: #667085;
   font-size: 0.75rem;
 }
 
 .application-meta span {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  white-space: nowrap;
 }
 
 .application-meta mat-icon,
 .column-link mat-icon {
   width: 16px;
   height: 16px;
+  flex: 0 0 16px;
   font-size: 16px;
   line-height: 16px;
 }

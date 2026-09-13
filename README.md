@@ -16,6 +16,20 @@ A portfolio-oriented full-stack application for organizing companies, job applic
 - OpenAPI documentation and automated frontend/backend tests
 - Separate user-management showcase with role-based permissions
 
+## Screenshots
+
+### Dashboard and pipeline summary
+
+![Job Tracker dashboard with application status totals, recent activity, and upcoming interviews](docs/screenshots/dashboard.png)
+
+### Application search and filters
+
+![Applications page with server-side filters, sorting, pagination, and status badges](docs/screenshots/applications.png)
+
+### Application and interview details
+
+![Application details page with an upcoming technical interview and completed screening history](docs/screenshots/application-details.png)
+
 ## Tech stack
 
 - **Frontend:** Angular 21, standalone components, Angular Material, RxJS, SCSS
