@@ -2,8 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Company;
+use App\Models\Interview;
+use App\Models\JobApplication;
 use App\Models\User;
-use App\OpenApi\UserManagementApiDocumentation;
+use App\OpenApi\ApplicationApiDocumentation;
+use App\Policies\CompanyPolicy;
+use App\Policies\InterviewPolicy;
+use App\Policies\JobApplicationPolicy;
 use App\Policies\UserPolicy;
 use Dedoc\Scramble\Scramble;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -28,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Company::class, CompanyPolicy::class);
+        Gate::policy(Interview::class, InterviewPolicy::class);
+        Gate::policy(JobApplication::class, JobApplicationPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 
         Scramble::configure()
@@ -43,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
 
                 return count($methods) === 1 ? $methods[0] : $methods;
             })
-            ->withDocumentTransformers(UserManagementApiDocumentation::class);
+            ->withDocumentTransformers(ApplicationApiDocumentation::class);
 
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(
             config('auth.login_rate_limit'),

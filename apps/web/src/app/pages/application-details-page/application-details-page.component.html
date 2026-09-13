@@ -1,0 +1,284 @@
+<main class="page">
+  <a mat-button class="back-link" routerLink="/applications">
+    <mat-icon fontSet="material-symbols-outlined">arrow_back</mat-icon>
+    Back to applications
+  </a>
+
+  @if (loadState() === 'loading') {
+    <section class="state-card" aria-live="polite">
+      <mat-progress-bar mode="indeterminate" />
+      <p>Loading application...</p>
+    </section>
+  } @else if (loadState() !== 'ready') {
+    <section class="state-card error-state" role="alert">
+      <mat-icon fontSet="material-symbols-outlined">warning</mat-icon>
+      <h1>{{ errorTitle }}</h1>
+      <p>{{ errorMessage }}</p>
+      <div class="state-actions">
+        <a mat-stroked-button routerLink="/applications">Back to applications</a>
+        @if (loadState() === 'error') {
+          <button mat-flat-button type="button" (click)="loadApplication()">Try again</button>
+        }
+      </div>
+    </section>
+  } @else if (application(); as application) {
+    <header class="page-toolbar">
+      <div>
+        <p class="section-label">{{ application.company.name }}</p>
+        <h1>{{ application.position }}</h1>
+        <p class="toolbar-subtitle">Application details, deadlines, and interview history.</p>
+      </div>
+      <span class="status-badge" [class]="'status-badge status-' + application.status">
+        {{ application.status | titlecase }}
+      </span>
+    </header>
+
+    <section class="details-card" aria-labelledby="application-overview-title">
+      <h2 id="application-overview-title">Application overview</h2>
+      <dl class="details-grid">
+        <div>
+          <dt>Company</dt>
+          <dd>{{ application.company.name }}</dd>
+        </div>
+        <div>
+          <dt>Work mode</dt>
+          <dd>{{ application.work_mode | titlecase }}</dd>
+        </div>
+        <div>
+          <dt>Employment type</dt>
+          <dd>{{ application.employment_type || 'Not specified' }}</dd>
+        </div>
+        <div>
+          <dt>Applied</dt>
+          <dd>
+            {{
+              application.applied_at ? (application.applied_at | date: 'MMM d, y') : 'Not specified'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Next action</dt>
+          <dd>
+            {{
+              application.next_action_at
+                ? (application.next_action_at | date: 'MMM d, y, h:mm a')
+                : 'Not specified'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>Salary</dt>
+          <dd>{{ salaryLabel(application) }}</dd>
+        </div>
+        <div class="full-width">
+          <dt>Source</dt>
+          <dd>
+            @if (application.source_url) {
+              <a [href]="application.source_url" target="_blank" rel="noopener noreferrer">
+                Open job posting
+                <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+              </a>
+            } @else {
+              Not specified
+            }
+          </dd>
+        </div>
+        <div class="full-width">
+          <dt>Notes</dt>
+          <dd class="notes">{{ application.notes || 'No notes added.' }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="interviews-card" aria-labelledby="interviews-title">
+      <header class="section-header">
+        <div>
+          <h2 id="interviews-title">Interviews</h2>
+          <p>Upcoming appointments and completed interview history.</p>
+        </div>
+        <button mat-flat-button type="button" (click)="openCreateInterview()">
+          Schedule interview
+        </button>
+      </header>
+
+      @if (application.interviews.length === 0) {
+        <div class="empty-state">
+          <mat-icon fontSet="material-symbols-outlined">event_available</mat-icon>
+          <p>No interviews scheduled yet.</p>
+        </div>
+      } @else {
+        @if (upcomingInterviews().length > 0) {
+          <div class="interview-group">
+            <h3>Upcoming</h3>
+            <div class="interview-list">
+              @for (interview of upcomingInterviews(); track interview.id) {
+                <article class="interview-item upcoming-item">
+                  <div class="interview-main">
+                    <div class="interview-heading">
+                      <span class="type-badge">{{ interview.type | titlecase }}</span>
+                      <strong>{{ interview.scheduled_at | date: 'MMM d, y, h:mm a' }}</strong>
+                    </div>
+                    @if (interview.contact_name || interview.contact_email) {
+                      <p>
+                        Contact:
+                        @if (interview.contact_name) {
+                          {{ interview.contact_name }}
+                        }
+                        @if (interview.contact_email) {
+                          <a [href]="'mailto:' + interview.contact_email">{{
+                            interview.contact_email
+                          }}</a>
+                        }
+                      </p>
+                    }
+                    @if (interview.location_or_link) {
+                      <p>
+                        Location:
+                        @if (isLink(interview.location_or_link)) {
+                          <a
+                            [href]="interview.location_or_link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Open meeting link
+                          </a>
+                        } @else {
+                          {{ interview.location_or_link }}
+                        }
+                      </p>
+                    }
+                    @if (interview.notes) {
+                      <p class="interview-notes">{{ interview.notes }}</p>
+                    }
+                  </div>
+                  <div class="interview-actions">
+                    <button
+                      mat-icon-button
+                      matTooltip="Edit interview"
+                      class="edit-action"
+                      type="button"
+                      [attr.aria-label]="'Edit ' + interview.type + ' interview'"
+                      (click)="openEditInterview(interview)"
+                    >
+                      <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      matTooltip="Delete interview"
+                      class="danger-action"
+                      type="button"
+                      [attr.aria-label]="'Delete ' + interview.type + ' interview'"
+                      (click)="requestDeleteInterview(interview)"
+                    >
+                      <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        }
+
+        @if (completedInterviews().length > 0) {
+          <div class="interview-group">
+            <h3>Completed</h3>
+            <div class="interview-list">
+              @for (interview of completedInterviews(); track interview.id) {
+                <article class="interview-item completed-item">
+                  <div class="interview-main">
+                    <div class="interview-heading">
+                      <span class="type-badge">{{ interview.type | titlecase }}</span>
+                      <strong>{{ interview.scheduled_at | date: 'MMM d, y, h:mm a' }}</strong>
+                      <span
+                        class="outcome-badge"
+                        [class]="'outcome-badge outcome-' + (interview.outcome || 'pending')"
+                      >
+                        {{
+                          interview.outcome ? (interview.outcome | titlecase) : 'Awaiting outcome'
+                        }}
+                      </span>
+                    </div>
+                    @if (interview.contact_name || interview.contact_email) {
+                      <p>
+                        Contact:
+                        @if (interview.contact_name) {
+                          {{ interview.contact_name }}
+                        }
+                        @if (interview.contact_email) {
+                          <a [href]="'mailto:' + interview.contact_email">{{
+                            interview.contact_email
+                          }}</a>
+                        }
+                      </p>
+                    }
+                    @if (interview.location_or_link) {
+                      <p>
+                        Location:
+                        @if (isLink(interview.location_or_link)) {
+                          <a
+                            [href]="interview.location_or_link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Open meeting link
+                          </a>
+                        } @else {
+                          {{ interview.location_or_link }}
+                        }
+                      </p>
+                    }
+                    @if (interview.notes) {
+                      <p class="interview-notes">{{ interview.notes }}</p>
+                    }
+                  </div>
+                  <div class="interview-actions">
+                    <button
+                      mat-icon-button
+                      matTooltip="Edit interview"
+                      class="edit-action"
+                      type="button"
+                      [attr.aria-label]="'Edit ' + interview.type + ' interview'"
+                      (click)="openEditInterview(interview)"
+                    >
+                      <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      matTooltip="Delete interview"
+                      class="danger-action"
+                      type="button"
+                      [attr.aria-label]="'Delete ' + interview.type + ' interview'"
+                      (click)="requestDeleteInterview(interview)"
+                    >
+                      <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        }
+      }
+    </section>
+
+    <app-interview-dialog
+      [visible]="dialogVisible()"
+      [mode]="dialogMode()"
+      [interview]="selectedInterview()"
+      [saving]="saving()"
+      [fieldErrors]="validationErrors()"
+      (close)="closeDialog()"
+      (save)="saveInterview($event)"
+    />
+
+    <app-confirm-dialog
+      [visible]="confirmDeleteVisible()"
+      [busy]="deleting()"
+      title="Delete interview"
+      confirmLabel="Delete"
+      message="Delete this interview from the application history?"
+      (cancel)="cancelDeleteInterview()"
+      (confirm)="confirmDeleteInterview()"
+    />
+  }
+</main>

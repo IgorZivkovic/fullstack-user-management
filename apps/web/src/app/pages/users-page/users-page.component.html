@@ -1,34 +1,25 @@
-<header class="page-toolbar">
-  <div class="toolbar-content">
-    <div class="toolbar-copy">
-      <span class="toolbar-title">Users</span>
-      <span class="toolbar-subtitle">
+<main class="page">
+  <header class="page-toolbar">
+    <div>
+      <p class="section-label">Administration</p>
+      <h1>Users</h1>
+      <p class="toolbar-subtitle">
         {{
           canManageUsers()
             ? 'Administrator access: add, edit, view, and delete users.'
             : 'Read-only access: view and filter users.'
         }}
-      </span>
+      </p>
     </div>
 
-    <span class="toolbar-spacer"></span>
-
     @if (canManageUsers()) {
-      <button mat-flat-button type="button" (click)="openAdd()">Add User</button>
+      <button mat-flat-button type="button" (click)="openAdd()">Add user</button>
     }
-    <button mat-stroked-button type="button" (click)="handleLogout()">Logout</button>
-  </div>
-</header>
-
-<main class="page">
-  <a routerLink="/" class="back-link">
-    <span aria-hidden="true">&larr;</span>
-    Back to Landing Page
-  </a>
+  </header>
 
   <section class="filters-card" aria-label="User filters">
     <div class="filters-row">
-      <mat-form-field class="filter-field" appearance="outline">
+      <mat-form-field class="filter-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>Search by name or country</mat-label>
         <input
           matInput
@@ -38,7 +29,7 @@
         />
       </mat-form-field>
 
-      <mat-form-field class="filter-field" appearance="outline">
+      <mat-form-field class="filter-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>Gender</mat-label>
         <mat-select [ngModel]="genderFilter" (ngModelChange)="handleGenderChange($event)">
           @for (option of genderOptions; track option.value) {
@@ -48,6 +39,20 @@
       </mat-form-field>
     </div>
   </section>
+
+  <app-user-table
+    [users]="users()"
+    [first]="first"
+    [totalRecords]="total()"
+    [pageSize]="pageSize"
+    [canManageUsers]="canManageUsers()"
+    [hasActiveFilters]="hasActiveFilters"
+    [loading]="loading()"
+    (view)="openView($event)"
+    (edit)="openEdit($event)"
+    (remove)="handleDelete($event)"
+    (pageChange)="handlePageChange($event)"
+  />
 
   <app-user-dialog
     [visible]="dialogVisible()"
@@ -66,23 +71,4 @@
     (cancel)="cancelDelete()"
     (confirm)="confirmDelete()"
   />
-
-  <section class="table-card" [attr.aria-busy]="loading()">
-    @if (loading()) {
-      <mat-progress-bar class="table-progress" mode="indeterminate" />
-    }
-    <app-user-table
-      [users]="users()"
-      [first]="first"
-      [totalRecords]="total()"
-      [pageSize]="pageSize"
-      [canManageUsers]="canManageUsers()"
-      [hasActiveFilters]="hasActiveFilters"
-      [loading]="loading()"
-      (view)="openView($event)"
-      (edit)="openEdit($event)"
-      (remove)="handleDelete($event)"
-      (pageChange)="handlePageChange($event)"
-    />
-  </section>
 </main>

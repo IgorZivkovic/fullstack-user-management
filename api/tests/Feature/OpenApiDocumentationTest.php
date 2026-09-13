@@ -20,7 +20,7 @@ class OpenApiDocumentationTest extends TestCase
         $specification = $response->json();
 
         $this->assertSame('3.1.0', $specification['openapi']);
-        $this->assertSame('User Management API', $specification['info']['title']);
+        $this->assertSame('Job Tracker API', $specification['info']['title']);
         $this->assertSame('v1', $specification['info']['version']);
 
         $expectedOperations = [
@@ -31,6 +31,17 @@ class OpenApiDocumentationTest extends TestCase
             '/api/v1/auth/me' => ['get'],
             '/api/v1/users' => ['get', 'post'],
             '/api/v1/users/{user}' => ['get', 'put', 'patch', 'delete'],
+            '/api/v1/companies' => ['get', 'post'],
+            '/api/v1/companies/{company}' => ['get', 'put', 'patch', 'delete'],
+            '/api/v1/job-applications' => ['get', 'post'],
+            '/api/v1/job-applications/{jobApplication}' => ['get', 'put', 'patch', 'delete'],
+            '/api/v1/job-applications/{jobApplication}/interviews' => ['get', 'post'],
+            '/api/v1/job-applications/{jobApplication}/interviews/{interview}' => [
+                'put',
+                'patch',
+                'delete',
+            ],
+            '/api/v1/dashboard' => ['get'],
         ];
 
         foreach ($expectedOperations as $path => $methods) {
@@ -49,6 +60,13 @@ class OpenApiDocumentationTest extends TestCase
         $this->assertArrayHasKey('200', $specification['paths']['/api/v1/auth/login']['post']['responses']);
         $this->assertArrayHasKey('201', $specification['paths']['/api/v1/users']['post']['responses']);
         $this->assertArrayHasKey('200', $specification['paths']['/api/v1/users/{user}']['delete']['responses']);
+        $this->assertArrayHasKey('201', $specification['paths']['/api/v1/companies']['post']['responses']);
+        $this->assertArrayHasKey('201', $specification['paths']['/api/v1/job-applications']['post']['responses']);
+        $this->assertArrayHasKey(
+            '201',
+            $specification['paths']['/api/v1/job-applications/{jobApplication}/interviews']['post']['responses'],
+        );
+        $this->assertArrayHasKey('200', $specification['paths']['/api/v1/dashboard']['get']['responses']);
 
         $healthResponse = json_encode(
             $specification['paths']['/api/v1/health']['get']['responses']['200'],
@@ -115,5 +133,126 @@ class OpenApiDocumentationTest extends TestCase
         $this->assertArrayHasKey('422', $specification['paths']['/api/v1/users']['post']['responses']);
         $this->assertArrayHasKey('403', $specification['paths']['/api/v1/users/{user}']['delete']['responses']);
         $this->assertArrayHasKey('404', $specification['paths']['/api/v1/users/{user}']['get']['responses']);
+    }
+
+    public function test_job_tracker_contracts_ownership_and_security_are_documented(): void
+    {
+        $specification = $this->getJson('/api/v1/docs/openapi.json')->json();
+        $paths = $specification['paths'];
+
+        $companyParameters = collect($paths['/api/v1/companies']['get']['parameters'])
+            ->where('in', 'query')
+            ->pluck('name')
+            ->all();
+        $applicationParameters = collect($paths['/api/v1/job-applications']['get']['parameters'])
+            ->where('in', 'query')
+            ->pluck('name')
+            ->all();
+
+        $this->assertEqualsCanonicalizing(
+            ['page', 'per_page', 'search'],
+            $companyParameters,
+        );
+        $this->assertEqualsCanonicalizing(
+            ['page', 'per_page', 'search', 'status', 'work_mode', 'company_id', 'sort', 'direction'],
+            $applicationParameters,
+        );
+
+        $applicationRequest = json_encode($this->resolveSchemaReference(
+            $specification,
+            $paths['/api/v1/job-applications']['post']
+                ['requestBody']['content']['application/json']['schema'],
+        ), JSON_THROW_ON_ERROR);
+        $interviewRequest = json_encode($this->resolveSchemaReference(
+            $specification,
+            $paths['/api/v1/job-applications/{jobApplication}/interviews']['post']
+                ['requestBody']['content']['application/json']['schema'],
+        ), JSON_THROW_ON_ERROR);
+        $dashboardEnvelope = $this->resolveSchemaReference(
+            $specification,
+            $paths['/api/v1/dashboard']['get']['responses']['200']
+                ['content']['application/json']['schema'],
+        );
+        $dashboardResponse = json_encode($this->resolveSchemaReference(
+            $specification,
+            $dashboardEnvelope['properties']['data'],
+        ), JSON_THROW_ON_ERROR);
+
+        foreach (['company_id', 'position', 'status', 'work_mode', 'salary_min', 'currency'] as $field) {
+            $this->assertStringContainsString($field, $applicationRequest);
+        }
+
+        foreach (['type', 'scheduled_at', 'contact_email', 'outcome'] as $field) {
+            $this->assertStringContainsString($field, $interviewRequest);
+        }
+
+        foreach (
+            ['total_applications', 'applications_by_status', 'recent_applications', 'upcoming_interviews']
+            as $field
+        ) {
+            $this->assertStringContainsString($field, $dashboardResponse);
+        }
+
+        $this->assertSame(
+            ['Companies'],
+            $paths['/api/v1/companies']['get']['tags'],
+        );
+        $this->assertSame(
+            ['Job Applications'],
+            $paths['/api/v1/job-applications']['get']['tags'],
+        );
+        $this->assertSame(
+            ['Interviews'],
+            $paths['/api/v1/job-applications/{jobApplication}/interviews']['get']['tags'],
+        );
+        $this->assertSame(
+            ['Dashboard'],
+            $paths['/api/v1/dashboard']['get']['tags'],
+        );
+
+        $this->assertSame(
+            ['sanctumSession' => []],
+            $paths['/api/v1/dashboard']['get']['security'][0],
+        );
+        $this->assertSame(
+            ['sanctumSession' => [], 'xsrfCookie' => [], 'csrfHeader' => []],
+            $paths['/api/v1/job-applications']['post']['security'][0],
+        );
+
+        $this->assertArrayHasKey('422', $paths['/api/v1/job-applications']['get']['responses']);
+        $this->assertArrayHasKey('422', $paths['/api/v1/job-applications']['post']['responses']);
+        $this->assertArrayHasKey('404', $paths['/api/v1/job-applications/{jobApplication}']['get']['responses']);
+        $this->assertArrayHasKey(
+            '404',
+            $paths['/api/v1/job-applications/{jobApplication}/interviews/{interview}']['patch']['responses'],
+        );
+        $this->assertArrayHasKey(
+            '422',
+            $paths['/api/v1/job-applications/{jobApplication}/interviews']['post']['responses'],
+        );
+        $this->assertArrayHasKey('409', $paths['/api/v1/companies/{company}']['delete']['responses']);
+
+        $this->assertStringContainsString(
+            'private to the authenticated account',
+            $specification['info']['description'],
+        );
+        $this->assertStringContainsString(
+            'owned job application',
+            strtolower((string) $paths['/api/v1/job-applications/{jobApplication}']['get']['summary']),
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $specification
+     * @param  array<string, mixed>  $schema
+     * @return array<string, mixed>
+     */
+    private function resolveSchemaReference(array $specification, array $schema): array
+    {
+        if (! isset($schema['$ref'])) {
+            return $schema;
+        }
+
+        return $specification['components']['schemas'][basename($schema['$ref'])];
     }
 }

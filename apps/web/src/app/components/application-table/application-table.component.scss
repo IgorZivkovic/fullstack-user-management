@@ -1,0 +1,124 @@
+th,
+td {
+  white-space: nowrap;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+  width: 20%;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 17%;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 13%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 13%;
+}
+
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6) {
+  width: 14%;
+}
+
+th:nth-child(7),
+td:nth-child(7) {
+  width: 160px;
+  text-align: center;
+}
+
+.position-link {
+  overflow: hidden;
+  display: block;
+  color: var(--app-primary);
+  font-weight: 650;
+  text-decoration: none;
+  text-overflow: ellipsis;
+}
+
+.position-link:hover {
+  text-decoration: underline;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #475467;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-applied {
+  background: #e7f1fc;
+  color: #1565c0;
+}
+
+.status-interview {
+  background: #f2e8f7;
+  color: #7b1fa2;
+}
+
+.status-offer {
+  background: #e8f5e9;
+  color: #237a3b;
+}
+
+.status-rejected,
+.status-withdrawn {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.action-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 20px;
+  vertical-align: middle;
+}
+
+.view-action {
+  color: #1565c0;
+}
+
+.edit-action {
+  color: #7b1fa2;
+}
+
+.danger-action {
+  color: #d32f2f;
+}
+
+.view-action:hover {
+  background: #e7f1fc;
+}
+
+.edit-action:hover {
+  background: #f2e8f7;
+}
+
+.danger-action:hover {
+  background: #fdecec;
+}

@@ -1,15 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatIconModule } from '@angular/material/icon';
+import { PageEvent } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { User } from '../../models/user.model';
+import { DataTableShellComponent } from '../../shared/components/data-table-shell/data-table-shell.component';
 
 @Component({
   selector: 'app-user-table',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatPaginatorModule, MatTableModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatTooltipModule,
+    DataTableShellComponent,
+  ],
   templateUrl: './user-table.component.html',
   styleUrl: './user-table.component.scss',
 })
@@ -43,7 +52,7 @@ export class UserTableComponent {
     }
 
     return this.canManageUsers
-      ? 'No users yet. Use "Add User" to create one.'
+      ? 'No users yet. Use "Add user" to create one.'
       : 'No users are available.';
   }
 

@@ -4,10 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { UserService } from '../../services/user.service';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
@@ -18,6 +17,7 @@ import {
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { Gender, User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
+import { readUserQueryState, writeUserQueryState } from './user-query-state';
 
 @Component({
   selector: 'app-users-page',
@@ -27,9 +27,7 @@ import { AuthService } from '../../services/auth.service';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressBarModule,
     MatSelectModule,
-    RouterLink,
     UserTableComponent,
     UserDialogComponent,
     ConfirmDialogComponent,
@@ -43,8 +41,9 @@ export class UsersPageComponent {
   private readonly userService = inject(UserService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly searchChanges = new Subject<string>();
 
   readonly users = this.userService.users;
@@ -77,11 +76,7 @@ export class UsersPageComponent {
   constructor() {
     this.searchChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        this.searchTerm = value;
-        this.first = 0;
-        this.loadUsers(1);
-      });
+      .subscribe(() => this.updateQueryParams(1));
 
     effect(() => {
       const error = this.userService.operationError();
@@ -97,7 +92,13 @@ export class UsersPageComponent {
       });
     });
 
-    this.loadUsers();
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const state = readUserQueryState(params);
+      this.searchTerm = state.search;
+      this.genderFilter = state.gender;
+      this.first = (state.page - 1) * this.pageSize;
+      this.loadUsers(state.page);
+    });
   }
 
   openAdd(): void {
@@ -194,17 +195,6 @@ export class UsersPageComponent {
     this.cancelDelete();
   }
 
-  handleLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.router.navigate(['/login']);
-      },
-    });
-  }
-
   handleSearchChange(value: string): void {
     this.searchTerm = value;
     this.searchChanges.next(value);
@@ -212,17 +202,15 @@ export class UsersPageComponent {
 
   handleGenderChange(value: Gender | 'all'): void {
     this.genderFilter = value;
-    this.first = 0;
-    this.loadUsers(1);
+    this.updateQueryParams(1);
   }
 
   handlePageChange(event: { first: number; rows: number }): void {
     if (event.first === this.first) {
       return;
     }
-    this.first = event.first;
-    const nextPage = Math.floor(this.first / this.pageSize) + 1;
-    this.loadUsers(nextPage, this.pageSize);
+    const nextPage = Math.floor(event.first / this.pageSize) + 1;
+    this.updateQueryParams(nextPage);
   }
 
   private loadUsers(page = 1, pageSize = this.pageSize): void {
@@ -231,6 +219,18 @@ export class UsersPageComponent {
       pageSize,
       search: this.searchTerm,
       gender: this.genderFilter,
+    });
+  }
+
+  private updateQueryParams(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: writeUserQueryState({
+        page,
+        search: this.searchTerm,
+        gender: this.genderFilter,
+      }),
+      replaceUrl: true,
     });
   }
 }

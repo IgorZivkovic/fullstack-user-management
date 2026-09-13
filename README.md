@@ -1,41 +1,40 @@
-# Full-stack user management demo
+# Job Application Tracker
 
-A portfolio-oriented full-stack application for managing users, built with an Angular frontend and a Laravel REST API.
+A portfolio-oriented full-stack application for organizing companies, job applications, interviews, and next steps throughout a private job-search pipeline. The frontend is built with Angular and the REST API with Laravel.
 
 ## Features
 
-- Email and password authentication
 - Session-based SPA authentication with Laravel Sanctum
-- Role-based access control:
-  - administrators can create, view, update, and delete users
-  - regular users have read-only access
-- Paginated user list with name/country search and gender filtering
-- Server-side validation and consistent API error responses
-- Responsive Angular interface with loading and error states
-- OpenAPI documentation generated from the Laravel API
-- Automated frontend and backend tests
+- Private Job Tracker data scoped to the authenticated account
+- Company, job application, and interview CRUD workflows
+- Six-stage application pipeline: saved, applied, interview, offer, rejected, and withdrawn
+- Dashboard totals, recent applications, upcoming interviews, and a Kanban-style status board
+- Server-side search, filtering, whitelisted sorting, and Laravel pagination
+- URL-backed list state, so filters and pages survive a browser refresh
+- Structured request validation and consistent API error responses
+- Responsive Angular Material interface with loading, empty, and retry states
+- OpenAPI documentation and automated frontend/backend tests
+- Separate user-management showcase with role-based permissions
 
 ## Tech stack
 
-- **Frontend:** Angular 21, Angular Material, RxJS, SCSS
+- **Frontend:** Angular 21, standalone components, Angular Material, RxJS, SCSS
 - **Backend:** Laravel 13, PHP 8.3+, Laravel Sanctum, Eloquent ORM
 - **Database:** MySQL 8
 - **API documentation:** Scramble / OpenAPI
-- **Workspace tooling:** Nx for the Angular application and shared TypeScript code
+- **Workspace tooling:** Nx for the Angular application and shared TypeScript contracts
 
 ## Repository structure
 
 ```text
 apps/web/   Angular application
-api/        Laravel API
-shared/     Shared frontend TypeScript contracts
+api/        Laravel REST API
+shared/     Shared Job Tracker TypeScript contracts
 ```
 
-Laravel is kept as a standard Composer application in `api/`. Nx manages the Angular side of the workspace, while the root npm scripts also provide convenient commands for running and testing both applications.
+Laravel remains a standard Composer application inside `api/`. Nx manages the Angular application and shared TypeScript library, while the root npm scripts provide convenient commands for the complete local stack.
 
 ## Prerequisites
-
-Install the following before starting:
 
 - A currently supported Node.js release with npm
 - PHP 8.3 or newer with the extensions required by Laravel and MySQL
@@ -55,7 +54,7 @@ composer install
 cd ..
 ```
 
-### 2. Create the Laravel environment file
+### 2. Configure Laravel
 
 PowerShell:
 
@@ -69,8 +68,6 @@ macOS, Linux, or Git Bash:
 cp api/.env.example api/.env
 ```
 
-The local `api/.env` file is intentionally ignored by Git. The tracked `api/.env.example` contains the safe defaults needed to configure a new clone.
-
 Generate the application key:
 
 ```powershell
@@ -79,9 +76,11 @@ php artisan key:generate
 cd ..
 ```
 
+The local `api/.env` file is intentionally ignored by Git. The tracked `api/.env.example` contains safe development defaults.
+
 ### 3. Create the MySQL database
 
-You can use an existing local MySQL account, or create a dedicated development database and user:
+Use an existing local MySQL account or create a dedicated development database and user:
 
 ```sql
 CREATE DATABASE fullstack_user_management
@@ -119,7 +118,7 @@ php artisan migrate --seed
 cd ..
 ```
 
-The seeder creates 60 deterministic user records and the two demo accounts listed below.
+The seeded data is described in [Demo data](#demo-data).
 
 ### 5. Start the application
 
@@ -137,71 +136,131 @@ This starts both development servers:
 
 ## Demo accounts
 
-These credentials exist only for the seeded local demo:
+Both accounts can fully manage their own companies, applications, and interviews. Their Job Tracker records are isolated: even the administrator cannot access another account's private tracker IDs.
 
-| Access | Email | Password | Permissions |
-| --- | --- | --- | --- |
-| Administrator | `admin@example.com` | `admin12345` | Full user CRUD |
-| Viewer | `viewer@example.com` | `viewer12345` | Read-only user access |
+| Account       | Email                | Password      | Job Tracker             | User management |
+| ------------- | -------------------- | ------------- | ----------------------- | --------------- |
+| Administrator | `admin@example.com`  | `admin12345`  | Full CRUD on owned data | Full CRUD       |
+| Standard user | `viewer@example.com` | `viewer12345` | Full CRUD on owned data | Read-only       |
 
-The viewer is represented by the `user` role in the API.
+The standard account uses the `user` role in the API. Demo credentials are intended only for local development.
 
-## Authentication
+## Demo data
 
-The application uses Laravel Sanctum's stateful SPA authentication. Before login, the Angular client requests `/sanctum/csrf-cookie`; after successful login, the browser uses the Laravel session cookie for authenticated requests. No access token is stored in browser storage.
+A fresh seeded database contains:
 
-When testing authentication from another HTTP client, enable cookie persistence and send the CSRF cookie/header pair expected by Sanctum.
+- 2 authentication accounts in `auth_users`
+- 12 deterministic records in the separate demonstrational `users` table
+- 15 companies, 26 job applications, and 12 interviews
+- 15 applications for the administrator and 11 for the standard account
+
+Each account has its own companies and enough applications to exercise pagination, search, filters, and multiple pipeline statuses. The Job Tracker records include all six application statuses, all three work modes, completed interviews, and pending upcoming interviews.
+
+The `users` rows are not login accounts and are intentionally independent from `auth_users`. They exist only for the original role-based user-management demonstration.
+
+## Main user flows
+
+1. Sign in with either demo account.
+2. Review application totals, recent activity, upcoming interviews, and the status board on the dashboard.
+3. Add companies before creating applications associated with them.
+4. Search or filter applications by status, work mode, or company, and sort supported columns.
+5. Open an application to update its details and schedule, edit, or remove interviews.
+6. Use the Users page to inspect the original demonstration module; only the administrator can mutate those records.
+
+Job Tracker list filters, sorting, and pagination are represented in URL query parameters, so refreshing or sharing a list URL preserves the current view.
+
+## Domain model
+
+- **AuthUser** owns companies and provides the authenticated account boundary.
+- **Company** belongs to one account and has many job applications. A company with applications cannot be deleted.
+- **JobApplication** belongs to a company, stores pipeline/work-mode details, and has many interviews. Deleting it also deletes its interviews.
+- **Interview** belongs to a job application and stores type, schedule, contact details, notes, and an optional outcome.
+- **User** is the independent record used by the original administrative showcase; it is not an authentication identity.
+
+Ownership is enforced in Eloquent scopes, route binding, policies, and feature tests. Requests for another account's tracker resource return `404 Not Found` to avoid revealing whether the ID exists.
+
+## Frontend routes
+
+| Route               | Purpose                                                            |
+| ------------------- | ------------------------------------------------------------------ |
+| `/`                 | Public project overview                                            |
+| `/login`            | Demo account sign-in                                               |
+| `/dashboard`        | Status totals, recent applications, upcoming interviews, and board |
+| `/applications`     | Filterable, sortable, paginated application list and CRUD          |
+| `/applications/:id` | Application details and interview management                       |
+| `/companies`        | Searchable company management                                      |
+| `/users`            | Original user-management showcase                                  |
+
+Authenticated feature routes are lazy-loaded by Angular.
 
 ## API overview
 
-All application endpoints use the `/api/v1` prefix.
+All REST endpoints use the `/api/v1` prefix except Sanctum's CSRF endpoint.
 
-| Method | Endpoint | Access |
-| --- | --- | --- |
-| `GET` | `/health` | Public |
-| `POST` | `/auth/login` | Public |
-| `POST` | `/auth/logout` | Authenticated |
-| `GET` | `/auth/me` | Authenticated |
-| `GET` | `/users` | Administrator and viewer |
-| `GET` | `/users/{user}` | Administrator and viewer |
-| `POST` | `/users` | Administrator |
-| `PUT/PATCH` | `/users/{user}` | Administrator |
-| `DELETE` | `/users/{user}` | Administrator |
+| Method                 | Endpoint                                                            | Access and purpose                        |
+| ---------------------- | ------------------------------------------------------------------- | ----------------------------------------- |
+| `GET`                  | `/sanctum/csrf-cookie`                                              | Public; initialize the SPA CSRF cookie    |
+| `GET`                  | `/api/v1/health`                                                    | Public health check                       |
+| `POST`                 | `/api/v1/auth/login`                                                | Public login                              |
+| `POST`                 | `/api/v1/auth/logout`                                               | Authenticated logout                      |
+| `GET`                  | `/api/v1/auth/me`                                                   | Restore/read the authenticated session    |
+| `GET`                  | `/api/v1/dashboard`                                                 | Account-scoped dashboard summary          |
+| `GET/POST`             | `/api/v1/companies`                                                 | List/search or create owned companies     |
+| `GET/PUT/PATCH/DELETE` | `/api/v1/companies/{company}`                                       | Manage an owned company                   |
+| `GET/POST`             | `/api/v1/job-applications`                                          | List/filter or create owned applications  |
+| `GET/PUT/PATCH/DELETE` | `/api/v1/job-applications/{job_application}`                        | Manage an owned application               |
+| `GET/POST`             | `/api/v1/job-applications/{job_application}/interviews`             | List or schedule interviews               |
+| `PUT/PATCH/DELETE`     | `/api/v1/job-applications/{job_application}/interviews/{interview}` | Update or remove an interview             |
+| `GET/POST`             | `/api/v1/users`                                                     | List users; administrator creates         |
+| `GET/PUT/PATCH/DELETE` | `/api/v1/users/{user}`                                              | Read users; administrator updates/deletes |
 
-The user collection follows Laravel pagination conventions:
+Example application query:
 
 ```text
-GET /api/v1/users?page=1&per_page=10&search=ana&gender=female
+GET /api/v1/job-applications?page=1&per_page=10&search=angular&status=applied&work_mode=remote&company_id=1&sort=applied_at&direction=desc
 ```
 
-The response contains the user records in `data`, navigation URLs in `links`, and pagination information in `meta`.
+Collection responses follow Laravel pagination conventions, with records in `data`, navigation URLs in `links`, and pagination information in `meta`.
 
-Validation and application errors use a consistent response containing `statusCode`, `errorCode`, `timestamp`, `path`, and `message`, with optional validation details.
+Validation and application errors use a consistent envelope containing `statusCode`, `errorCode`, `timestamp`, `path`, and `message`, with optional validation details.
+
+## Authentication
+
+The application uses Laravel Sanctum's stateful SPA flow:
+
+1. Angular requests `/sanctum/csrf-cookie`.
+2. Login credentials are posted to `/api/v1/auth/login`.
+3. The browser stores Laravel's session cookie and sends it with protected requests.
+4. On page refresh, Angular calls `/api/v1/auth/me` to restore the current account.
+5. Logout invalidates the server session through `/api/v1/auth/logout`.
+
+No access token is stored in browser storage. When using another HTTP client, persist cookies and send the CSRF cookie/header pair expected by Sanctum.
 
 ## Useful commands
 
 Run these from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm start` | Start the Angular development server |
-| `npm run start:api` | Start the Laravel development server |
-| `npm run start:all` | Start Angular and Laravel together |
-| `npm run start:full` | Apply pending migrations, then start both servers |
-| `npm test` | Run the Angular and Laravel test suites |
-| `npm run test:web` | Run Angular tests |
-| `npm run test:api` | Run Laravel tests |
-| `npm run build` | Create the Angular production build |
-| `npm run db:migrate` | Apply pending Laravel migrations |
-| `npm run db:seed` | Seed the configured database |
-| `npm run db:fresh` | Recreate all tables and seed them; existing data is deleted |
+| Command              | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `npm start`          | Start the Angular development server                        |
+| `npm run start:api`  | Start the Laravel development server                        |
+| `npm run start:all`  | Start Angular and Laravel together                          |
+| `npm run start:full` | Apply pending migrations, then start both servers           |
+| `npm test`           | Run Angular and Laravel test suites                         |
+| `npm run test:web`   | Run Angular tests                                           |
+| `npm run test:api`   | Run Laravel tests                                           |
+| `npx nx test shared` | Run shared-contract tests                                   |
+| `npm run build`      | Create the Angular production build                         |
+| `npm run db:migrate` | Apply pending Laravel migrations                            |
+| `npm run db:seed`    | Seed the configured database                                |
+| `npm run db:fresh`   | Recreate all tables and seed them; existing data is deleted |
 
 ## Migration history
 
-The project was initially built with a Node.js/NestJS backend, Drizzle ORM, and SQLite. The backend was later migrated to Laravel, Eloquent, MySQL, and Sanctum while preserving the existing REST functionality and role-based access rules.
+The project was initially a user-management demo with a Node.js/NestJS backend, Drizzle ORM, and SQLite. The backend was migrated to Laravel, Eloquent, MySQL, and Sanctum while preserving the existing REST behavior and role-based access rules. The application was then expanded into the current Job Application Tracker.
 
-The migration also adopted Laravel conventions for request validation, API resources, authorization policies, session authentication, database migrations, seeders, and pagination.
+The migration adopted Laravel conventions for request validation, API resources, authorization policies, session authentication, database migrations, seeders, pagination, and generated OpenAPI documentation. The original user-management feature remains available as an additional administrator/demonstration module instead of being discarded.
 
 ## Production considerations
 
-The included credentials and environment defaults are intended only for local demonstration. For deployment, use unique secrets, disable debug mode, configure the production database and trusted frontend domains, serve both applications over HTTPS, and do not seed the demo accounts.
+The included credentials, example URLs, and environment defaults are for local demonstration only. For deployment, use unique secrets, disable debug mode, configure production database credentials and trusted frontend domains, serve both applications over HTTPS, and do not seed demo accounts or records.

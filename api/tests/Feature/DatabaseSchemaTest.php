@@ -40,6 +40,9 @@ class DatabaseSchemaTest extends TestCase
 
         $this->assertTrue(Schema::hasTable('cache'));
         $this->assertTrue(Schema::hasTable('cache_locks'));
+        $this->assertTrue(Schema::hasTable('companies'));
+        $this->assertTrue(Schema::hasTable('job_applications'));
+        $this->assertTrue(Schema::hasTable('interviews'));
         $this->assertFalse(Schema::hasTable('jobs'));
     }
 
@@ -71,5 +74,8 @@ class DatabaseSchemaTest extends TestCase
         $this->assertFalse(Schema::hasTable('auth_users'));
         $this->assertFalse(Schema::hasTable('sessions'));
         $this->assertFalse(Schema::hasTable('cache'));
+        $this->assertFalse(Schema::hasTable('companies'));
+        $this->assertFalse(Schema::hasTable('job_applications'));
+        $this->assertFalse(Schema::hasTable('interviews'));
     }
 }

@@ -1,0 +1,40 @@
+<section class="table-card" [attr.aria-busy]="loading">
+  @if (loading) {
+    <mat-progress-bar
+      class="table-progress"
+      mode="indeterminate"
+      [attr.aria-label]="loadingMessage"
+    />
+  }
+
+  <div class="table-scroll">
+    <table
+      mat-table
+      [dataSource]="loading ? [] : data"
+      [style.min-width]="tableMinWidth"
+      class="data-table"
+    >
+      <ng-content />
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="mat-row state-row" *matNoDataRow>
+        <td class="mat-cell empty-cell" [attr.colspan]="displayedColumns.length">
+          {{ stateMessage }}
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="totalRecords"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[pageSize]"
+    [hidePageSize]="true"
+    [showFirstLastButtons]="true"
+    [disabled]="loading"
+    [attr.aria-label]="paginatorLabel"
+    (page)="handlePageChange($event)"
+  />
+</section>

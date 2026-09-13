@@ -1,11 +1,12 @@
-# shared
+# Shared Job Tracker contracts
 
-This library was generated with [Nx](https://nx.dev).
+Framework-independent TypeScript contracts shared by the Angular Job Tracker features.
 
-## Building
+The library contains application statuses, work modes, interview types/outcomes, API payloads, filters, pagination-related query types, and dashboard response models.
 
-Run `nx build shared` to build the library.
+```powershell
+npx nx build shared
+npx nx test shared
+```
 
-## Running unit tests
-
-Run `nx test shared` to execute the unit tests via [Jest](https://jestjs.io).
+See the [root README](../README.md) for the complete application architecture and setup.

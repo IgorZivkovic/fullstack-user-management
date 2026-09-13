@@ -1,0 +1,61 @@
+<main class="page">
+  <header class="page-toolbar">
+    <div>
+      <p class="section-label">Job Application Tracker</p>
+      <h1>Companies</h1>
+      <p class="toolbar-subtitle">Manage the companies connected to your applications.</p>
+    </div>
+    <button mat-flat-button type="button" (click)="openCreate()">Add company</button>
+  </header>
+
+  <section class="filters-card" aria-label="Company filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Search by name or location</mat-label>
+      <input
+        matInput
+        type="search"
+        [ngModel]="searchTerm"
+        (ngModelChange)="handleSearchChange($event)"
+      />
+    </mat-form-field>
+  </section>
+
+  <app-company-table
+    [companies]="companies()"
+    [loading]="loading()"
+    [emptyMessage]="
+      hasActiveSearch
+        ? 'No companies match your search.'
+        : 'No companies yet. Use &quot;Add company&quot; to create one.'
+    "
+    [totalRecords]="total()"
+    [pageIndex]="currentPage() - 1"
+    [pageSize]="pageSize"
+    (edit)="openEdit($event)"
+    (remove)="requestDelete($event)"
+    (pageChange)="handlePageChange($event)"
+  />
+
+  <app-company-dialog
+    [visible]="dialogVisible()"
+    [mode]="dialogMode()"
+    [company]="selectedCompany()"
+    [saving]="saving()"
+    (close)="closeDialog()"
+    (save)="saveCompany($event)"
+  />
+
+  <app-confirm-dialog
+    [visible]="confirmDeleteVisible()"
+    [busy]="deleting()"
+    title="Delete company"
+    confirmLabel="Delete"
+    [message]="
+      'Delete ' +
+      (companyPendingDelete()?.name ?? 'this company') +
+      '? Companies with job applications cannot be deleted.'
+    "
+    (cancel)="cancelDelete()"
+    (confirm)="confirmDelete()"
+  />
+</main>

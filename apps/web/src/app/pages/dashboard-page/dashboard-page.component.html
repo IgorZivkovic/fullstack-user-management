@@ -1,0 +1,61 @@
+<main class="page" [attr.aria-busy]="loading()">
+  <header class="page-toolbar">
+    <div>
+      <p class="section-label">Job Application Tracker</p>
+      <h1>Dashboard</h1>
+      <p class="toolbar-subtitle">Your pipeline, recent activity, and upcoming conversations.</p>
+    </div>
+    <a mat-flat-button routerLink="/applications">Open applications</a>
+  </header>
+
+  @if (loading()) {
+    <section class="state-card" role="status">
+      <mat-progress-bar mode="indeterminate" aria-label="Loading dashboard" />
+      <div class="state-content">
+        <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">dashboard</mat-icon>
+        <span>Loading dashboard...</span>
+      </div>
+    </section>
+  } @else if (loadFailed()) {
+    <section class="state-card error-state" role="alert">
+      <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">cloud_off</mat-icon>
+      <h2>Dashboard could not be loaded</h2>
+      <p>Check the connection and try again.</p>
+      <button mat-flat-button type="button" (click)="loadDashboard()">Retry</button>
+    </section>
+  } @else if (dashboard(); as summary) {
+    <section class="summary-grid" aria-label="Application summary">
+      <article class="summary-card total-card">
+        <div class="summary-icon">
+          <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">work_history</mat-icon>
+        </div>
+        <div>
+          <span>Total applications</span>
+          <strong>{{ summary.total_applications }}</strong>
+        </div>
+      </article>
+
+      @for (item of statusSummary(); track item.status) {
+        <a
+          class="summary-card status-summary"
+          [class]="'summary-card status-summary status-' + item.status"
+          routerLink="/applications"
+          [queryParams]="{ status: item.status }"
+        >
+          <span>{{ item.status | titlecase }}</span>
+          <strong>{{ item.count }}</strong>
+        </a>
+      }
+    </section>
+
+    <app-dashboard-overview
+      [recentApplications]="summary.recent_applications"
+      [upcomingInterviews]="summary.upcoming_interviews"
+    />
+
+    <app-application-board
+      [applications]="boardApplications()"
+      [totalApplications]="boardTotal()"
+    />
+  }
+</main>

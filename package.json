@@ -40,6 +40,7 @@
     "@angular/material": "^21.2.14",
     "@angular/platform-browser": "^21.2.23",
     "@angular/router": "^21.2.23",
+    "@fontsource/material-symbols-outlined": "^5.3.5",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

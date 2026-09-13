@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         fake()->seed(42);
 
-        User::factory()->count(60)->create();
+        User::factory()->count(12)->create();
 
         AuthUser::factory()->admin()->create([
             'email' => 'admin@example.com',
@@ -29,5 +29,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'viewer@example.com',
             'password' => 'viewer12345',
         ]);
+
+        $this->call(JobTrackerSeeder::class);
     }
 }

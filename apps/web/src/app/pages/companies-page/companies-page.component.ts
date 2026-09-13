@@ -1,0 +1,234 @@
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { PageEvent } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import {
+  CompanyDialogComponent,
+  CompanyDialogMode,
+} from '../../components/company-dialog/company-dialog.component';
+import { CompanyTableComponent } from '../../components/company-table/company-table.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
+import { Company, CompanyPayload } from '../../models/job-tracker.model';
+import { ApiErrorService } from '../../services/api-error.service';
+import { CompanyService } from '../../services/company.service';
+import { readCompanyQueryState, writeCompanyQueryState } from './company-query-state';
+
+@Component({
+  selector: 'app-companies-page',
+  standalone: true,
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    CompanyDialogComponent,
+    CompanyTableComponent,
+    ConfirmDialogComponent,
+  ],
+  templateUrl: './companies-page.component.html',
+  styleUrl: './companies-page.component.scss',
+})
+export class CompaniesPageComponent {
+  private readonly companyService = inject(CompanyService);
+  private readonly apiErrors = inject(ApiErrorService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly searchChanges = new Subject<string>();
+
+  readonly companies = signal<Company[]>([]);
+  readonly loading = signal(false);
+  readonly total = signal(0);
+  readonly currentPage = signal(1);
+  readonly dialogVisible = signal(false);
+  readonly dialogMode = signal<CompanyDialogMode>('create');
+  readonly selectedCompany = signal<Company | null>(null);
+  readonly saving = signal(false);
+  readonly confirmDeleteVisible = signal(false);
+  readonly companyPendingDelete = signal<Company | null>(null);
+  readonly deleting = signal(false);
+
+  searchTerm = '';
+  readonly pageSize = 10;
+
+  get hasActiveSearch(): boolean {
+    return this.searchTerm.trim().length > 0;
+  }
+
+  constructor() {
+    this.searchChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateQueryParams(1));
+
+    effect(() => {
+      const error = this.apiErrors.lastError();
+      if (!error) {
+        return;
+      }
+
+      this.snackBar.open(error.message, 'Dismiss', {
+        duration: 5000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar'],
+      });
+    });
+
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const state = readCompanyQueryState(params);
+      this.searchTerm = state.search;
+      this.currentPage.set(state.page);
+      this.loadCompanies(state.page);
+    });
+  }
+
+  openCreate(): void {
+    this.selectedCompany.set(null);
+    this.dialogMode.set('create');
+    this.dialogVisible.set(true);
+  }
+
+  openEdit(company: Company): void {
+    this.selectedCompany.set(company);
+    this.dialogMode.set('edit');
+    this.dialogVisible.set(true);
+  }
+
+  closeDialog(): void {
+    if (!this.saving()) {
+      this.dialogVisible.set(false);
+    }
+  }
+
+  saveCompany(payload: CompanyPayload): void {
+    const company = this.selectedCompany();
+    const request = company
+      ? this.companyService.update(company.id, payload)
+      : this.companyService.create(payload);
+
+    this.apiErrors.clear();
+    this.saving.set(true);
+    request
+      .pipe(
+        finalize(() => this.saving.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          const wasCreated = company === null;
+          this.dialogVisible.set(false);
+          this.snackBar.open(wasCreated ? 'Company added.' : 'Company updated.', 'Dismiss', {
+            duration: 3000,
+          });
+          this.refreshPage(wasCreated ? 1 : this.currentPage());
+        },
+        error: () => {
+          // ApiErrorService displays the backend validation or operation message.
+        },
+      });
+  }
+
+  requestDelete(company: Company): void {
+    this.companyPendingDelete.set(company);
+    this.confirmDeleteVisible.set(true);
+  }
+
+  cancelDelete(): void {
+    if (this.deleting()) {
+      return;
+    }
+
+    this.confirmDeleteVisible.set(false);
+    this.companyPendingDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const company = this.companyPendingDelete();
+    if (!company || this.deleting()) {
+      return;
+    }
+
+    this.apiErrors.clear();
+    this.deleting.set(true);
+    this.companyService
+      .remove(company.id)
+      .pipe(
+        finalize(() => this.deleting.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.confirmDeleteVisible.set(false);
+          this.companyPendingDelete.set(null);
+          this.snackBar.open('Company deleted.', 'Dismiss', { duration: 3000 });
+
+          const targetPage =
+            this.companies().length === 1 && this.currentPage() > 1
+              ? this.currentPage() - 1
+              : this.currentPage();
+          this.refreshPage(targetPage);
+        },
+        error: () => {
+          this.confirmDeleteVisible.set(false);
+          this.companyPendingDelete.set(null);
+        },
+      });
+  }
+
+  handleSearchChange(value: string): void {
+    this.searchTerm = value;
+    this.searchChanges.next(value.trim());
+  }
+
+  handlePageChange(event: PageEvent): void {
+    const page = event.pageIndex + 1;
+    if (page !== this.currentPage()) {
+      this.updateQueryParams(page);
+    }
+  }
+
+  loadCompanies(page = this.currentPage()): void {
+    this.apiErrors.clear();
+    this.loading.set(true);
+    this.companyService
+      .list({ page, per_page: this.pageSize, search: this.searchTerm })
+      .pipe(
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response) => {
+          this.companies.set(response.data);
+          this.total.set(response.meta.total);
+          this.currentPage.set(response.meta.current_page);
+        },
+        error: () => {
+          // ApiErrorService keeps the previous list visible and reports the error.
+        },
+      });
+  }
+
+  private refreshPage(page: number): void {
+    if (page !== this.currentPage()) {
+      this.updateQueryParams(page);
+      return;
+    }
+
+    this.loadCompanies(page);
+  }
+
+  private updateQueryParams(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: writeCompanyQueryState({ page, search: this.searchTerm }),
+      replaceUrl: true,
+    });
+  }
+}

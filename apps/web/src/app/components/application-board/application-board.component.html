@@ -1,0 +1,77 @@
+<section class="board-section" aria-labelledby="application-board-title">
+  <div class="section-heading">
+    <div>
+      <p class="section-label">Pipeline</p>
+      <h2 id="application-board-title">Application board</h2>
+      <p>Review every opportunity by its current status.</p>
+    </div>
+    <a mat-stroked-button routerLink="/applications">Manage applications</a>
+  </div>
+
+  @if (isTruncated()) {
+    <p class="board-notice" role="status">
+      Showing the first {{ applications().length }} of {{ totalApplications() }} applications.
+    </p>
+  }
+
+  <div class="board" aria-label="Applications grouped by status">
+    @for (column of columns(); track column.status) {
+      <section class="board-column" [attr.aria-labelledby]="column.status + '-column-title'">
+        <header class="column-header">
+          <div class="column-title">
+            <span class="status-dot" [class]="'status-dot status-' + column.status"></span>
+            <h3 [id]="column.status + '-column-title'">{{ column.status | titlecase }}</h3>
+          </div>
+          <span
+            class="column-count"
+            [attr.aria-label]="column.applications.length + ' applications'"
+          >
+            {{ column.applications.length }}
+          </span>
+        </header>
+
+        <div class="column-content">
+          @for (application of column.applications; track application.id) {
+            <article class="application-card">
+              <div>
+                <a class="application-title" [routerLink]="['/applications', application.id]">
+                  {{ application.position }}
+                </a>
+                <p class="company-name">{{ application.company.name }}</p>
+              </div>
+
+              <div class="application-meta">
+                <span>
+                  <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">work</mat-icon>
+                  {{ application.work_mode | titlecase }}
+                </span>
+                @if (application.next_action_at) {
+                  <span>
+                    <mat-icon fontSet="material-symbols-outlined" aria-hidden="true"
+                      >event</mat-icon
+                    >
+                    {{ application.next_action_at | date: 'MMM d' }}
+                  </span>
+                }
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-column">
+              <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">inbox</mat-icon>
+              <span>No applications</span>
+            </div>
+          }
+        </div>
+
+        <a
+          class="column-link"
+          [routerLink]="['/applications']"
+          [queryParams]="{ status: column.status }"
+        >
+          View {{ column.status }} applications
+          <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+      </section>
+    }
+  </div>
+</section>

@@ -22,10 +22,13 @@
         "assets": [
           {
             "glob": "**/*",
-            "input": "public"
+            "input": "apps/web/public"
           }
         ],
-        "styles": ["apps/web/src/styles.scss"],
+        "styles": [
+          "node_modules/@fontsource/material-symbols-outlined/400.css",
+          "apps/web/src/styles.scss"
+        ],
         "outputPath": "dist/web"
       },
       "configurations": {

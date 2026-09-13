@@ -1,0 +1,76 @@
+<section class="overview-grid">
+  <article class="overview-card" aria-labelledby="recent-applications-title">
+    <div class="card-heading">
+      <div>
+        <p class="section-label">Activity</p>
+        <h2 id="recent-applications-title">Recent applications</h2>
+      </div>
+      <a mat-button routerLink="/applications">View all</a>
+    </div>
+
+    <div class="list-content">
+      @for (application of recentApplications(); track application.id) {
+        <a class="list-item" [routerLink]="['/applications', application.id]">
+          <span class="item-icon application-icon">
+            <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">description</mat-icon>
+          </span>
+          <span class="item-copy">
+            <strong>{{ application.position }}</strong>
+            <span>{{ application.company.name }}</span>
+          </span>
+          <span class="item-side">
+            <span class="status-badge" [class]="'status-badge status-' + application.status">
+              {{ application.status | titlecase }}
+            </span>
+            <time [attr.datetime]="application.created_at">
+              {{ application.created_at | date: 'MMM d, y' }}
+            </time>
+          </span>
+        </a>
+      } @empty {
+        <div class="empty-list">
+          <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">note_add</mat-icon>
+          <p>No applications yet.</p>
+          <a mat-stroked-button routerLink="/applications">Add your first application</a>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="overview-card" aria-labelledby="upcoming-interviews-title">
+    <div class="card-heading">
+      <div>
+        <p class="section-label">Schedule</p>
+        <h2 id="upcoming-interviews-title">Upcoming interviews</h2>
+      </div>
+    </div>
+
+    <div class="list-content">
+      @for (interview of upcomingInterviews(); track interview.id) {
+        <a class="list-item" [routerLink]="['/applications', interview.job_application.id]">
+          <span class="item-icon interview-icon">
+            <mat-icon fontSet="material-symbols-outlined" aria-hidden="true">event</mat-icon>
+          </span>
+          <span class="item-copy">
+            <strong>{{ interview.job_application.position }}</strong>
+            <span>
+              {{ interview.job_application.company.name }} · {{ interview.type | titlecase }}
+            </span>
+          </span>
+          <time class="interview-time" [attr.datetime]="interview.scheduled_at">
+            <strong>{{ interview.scheduled_at | date: 'MMM d' }}</strong>
+            <span>{{ interview.scheduled_at | date: 'h:mm a' }}</span>
+          </time>
+        </a>
+      } @empty {
+        <div class="empty-list">
+          <mat-icon fontSet="material-symbols-outlined" aria-hidden="true"
+            >event_available</mat-icon
+          >
+          <p>No upcoming interviews.</p>
+          <span>Newly scheduled interviews will appear here.</span>
+        </div>
+      }
+    </div>
+  </article>
+</section>

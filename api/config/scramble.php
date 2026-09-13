@@ -12,7 +12,9 @@ return [
     'info' => [
         'version' => env('API_VERSION', 'v1'),
         'description' => <<<'MARKDOWN'
-REST API for the user management demo.
+REST API for a full-stack job application tracker. It covers companies, job applications, interview scheduling and dashboard summaries. The original user management module remains available as an administrator showcase.
+
+Job Tracker records are private to the authenticated account. Requests for another account's company, application or interview return `404 Not Found` instead of exposing whether that resource exists.
 
 Authentication uses Laravel Sanctum's stateful SPA flow:
 
@@ -25,7 +27,7 @@ MARKDOWN,
     ],
 
     'ui' => [
-        'title' => 'User Management API',
+        'title' => 'Job Tracker API',
     ],
 
     'renderer' => 'scalar',
