@@ -15,14 +15,9 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./pages/job-tracker-placeholder/job-tracker-placeholder.component').then(
-            (module) => module.JobTrackerPlaceholderComponent,
+          import('./pages/dashboard-page/dashboard-page.component').then(
+            (module) => module.DashboardPageComponent,
           ),
-        data: {
-          title: 'Dashboard',
-          description:
-            'Application totals, recent activity, and upcoming interviews will appear here.',
-        },
       },
       {
         path: 'applications',

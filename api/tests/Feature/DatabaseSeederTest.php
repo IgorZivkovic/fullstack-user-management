@@ -16,9 +16,9 @@ class DatabaseSeederTest extends TestCase
 
         $this->assertDatabaseCount('users', 60);
         $this->assertDatabaseCount('auth_users', 2);
-        $this->assertDatabaseCount('companies', 6);
-        $this->assertDatabaseCount('job_applications', 7);
-        $this->assertDatabaseCount('interviews', 6);
+        $this->assertDatabaseCount('companies', 15);
+        $this->assertDatabaseCount('job_applications', 18);
+        $this->assertDatabaseCount('interviews', 12);
 
         $admin = AuthUser::query()->where('email', 'admin@example.com')->firstOrFail();
         $viewer = AuthUser::query()->where('email', 'viewer@example.com')->firstOrFail();
@@ -34,9 +34,9 @@ class DatabaseSeederTest extends TestCase
         $adminApplications = $admin->companies->flatMap->jobApplications;
         $viewerApplications = $viewer->companies->flatMap->jobApplications;
 
-        $this->assertCount(3, $admin->companies);
-        $this->assertCount(4, $adminApplications);
-        $this->assertCount(3, $adminApplications->flatMap->interviews);
+        $this->assertCount(12, $admin->companies);
+        $this->assertCount(15, $adminApplications);
+        $this->assertCount(9, $adminApplications->flatMap->interviews);
         $this->assertCount(3, $viewer->companies);
         $this->assertCount(3, $viewerApplications);
         $this->assertCount(3, $viewerApplications->flatMap->interviews);
@@ -58,6 +58,16 @@ class DatabaseSeederTest extends TestCase
         $firstRun = $this->jobTrackerData();
 
         $this->artisan('migrate:fresh --seed')->assertSuccessful();
+
+        $this->assertSame($firstRun, $this->jobTrackerData());
+    }
+
+    public function test_job_tracker_seeder_can_be_rerun_without_duplicate_demo_data(): void
+    {
+        $this->artisan('migrate:fresh --seed')->assertSuccessful();
+        $firstRun = $this->jobTrackerData();
+
+        $this->artisan('db:seed --class=JobTrackerSeeder')->assertSuccessful();
 
         $this->assertSame($firstRun, $this->jobTrackerData());
     }

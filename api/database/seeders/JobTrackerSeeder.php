@@ -30,14 +30,29 @@ class JobTrackerSeeder extends Seeder
                 $applications = $companyData['applications'];
                 unset($companyData['applications']);
 
-                $company = $account->companies()->create($companyData);
+                $company = $account->companies()->firstOrCreate(
+                    ['name' => $companyData['name']],
+                    $companyData,
+                );
 
                 foreach ($applications as $applicationData) {
                     $interviews = $applicationData['interviews'] ?? [];
                     unset($applicationData['interviews']);
 
-                    $application = $company->jobApplications()->create($applicationData);
-                    $application->interviews()->createMany($interviews);
+                    $application = $company->jobApplications()->firstOrCreate(
+                        ['position' => $applicationData['position']],
+                        $applicationData,
+                    );
+
+                    foreach ($interviews as $interviewData) {
+                        $application->interviews()->firstOrCreate(
+                            [
+                                'type' => $interviewData['type'],
+                                'scheduled_at' => $interviewData['scheduled_at'],
+                            ],
+                            $interviewData,
+                        );
+                    }
                 }
             }
         }
@@ -141,6 +156,257 @@ class JobTrackerSeeder extends Seeder
                                     'outcome' => InterviewOutcome::Failed,
                                 ],
                             ],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'BrightPeak Software',
+                    'website' => 'https://brightpeak.example.com',
+                    'location' => 'Prague, Czechia',
+                    'notes' => 'B2B platform team modernizing a large frontend codebase.',
+                    'applications' => [
+                        [
+                            'position' => 'Senior Frontend Engineer',
+                            'status' => JobApplicationStatus::Rejected,
+                            'work_mode' => WorkMode::Hybrid,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://brightpeak.example.com/jobs/senior-frontend',
+                            'applied_at' => '2026-06-18',
+                            'salary_min' => 62_000,
+                            'salary_max' => 75_000,
+                            'currency' => 'EUR',
+                            'notes' => 'Automated rejection after the application review.',
+                        ],
+                        [
+                            'position' => 'Angular Platform Engineer',
+                            'status' => JobApplicationStatus::Applied,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://brightpeak.example.com/jobs/angular-platform',
+                            'applied_at' => '2026-09-05',
+                            'next_action_at' => '2026-09-18 09:00:00',
+                            'salary_min' => 68_000,
+                            'salary_max' => 82_000,
+                            'currency' => 'EUR',
+                            'notes' => 'Send a short follow-up if there is no response after two weeks.',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Greenline Mobility',
+                    'website' => 'https://greenline.example.com',
+                    'location' => 'Vienna, Austria',
+                    'notes' => 'Mobility startup building tools for public transport operators.',
+                    'applications' => [
+                        [
+                            'position' => 'Full-stack Developer',
+                            'status' => JobApplicationStatus::Rejected,
+                            'work_mode' => WorkMode::Hybrid,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://greenline.example.com/careers/full-stack',
+                            'applied_at' => '2026-07-02',
+                            'notes' => 'Role was put on hold after the first recruiter conversation.',
+                            'interviews' => [
+                                [
+                                    'type' => InterviewType::Screening,
+                                    'scheduled_at' => '2026-07-09 10:30:00',
+                                    'contact_name' => 'Lena Bauer',
+                                    'contact_email' => 'lena@greenline.example.com',
+                                    'location_or_link' => 'https://meet.example.com/greenline-screening',
+                                    'notes' => 'Discussed product scope and remote-work expectations.',
+                                    'outcome' => InterviewOutcome::Cancelled,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Harbor Financial',
+                    'website' => 'https://harbor-financial.example.com',
+                    'location' => 'Zagreb, Croatia',
+                    'notes' => 'Fintech product company with a small web platform group.',
+                    'applications' => [
+                        [
+                            'position' => 'Web Application Engineer',
+                            'status' => JobApplicationStatus::Interview,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://harbor-financial.example.com/jobs/web-engineer',
+                            'applied_at' => '2026-08-25',
+                            'next_action_at' => '2026-09-19 13:00:00',
+                            'salary_min' => 66_000,
+                            'salary_max' => 80_000,
+                            'currency' => 'EUR',
+                            'notes' => 'Prepare an architecture walkthrough and testing examples.',
+                            'interviews' => [
+                                [
+                                    'type' => InterviewType::Screening,
+                                    'scheduled_at' => '2026-09-04 09:30:00',
+                                    'contact_name' => 'Ivana Markovic',
+                                    'contact_email' => 'ivana@harbor-financial.example.com',
+                                    'location_or_link' => 'https://meet.example.com/harbor-screening',
+                                    'notes' => 'Positive introductory call.',
+                                    'outcome' => InterviewOutcome::Passed,
+                                ],
+                                [
+                                    'type' => InterviewType::Technical,
+                                    'scheduled_at' => '2026-09-19 13:00:00',
+                                    'contact_name' => 'Mateo Kovac',
+                                    'contact_email' => 'mateo@harbor-financial.example.com',
+                                    'location_or_link' => 'https://meet.example.com/harbor-technical',
+                                    'notes' => 'Frontend architecture, API integration, and pair programming.',
+                                    'outcome' => null,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Cloud Harbor',
+                    'website' => 'https://cloud-harbor.example.com',
+                    'location' => 'Remote',
+                    'notes' => 'Cloud consultancy working with distributed European teams.',
+                    'applications' => [
+                        [
+                            'position' => 'Angular Consultant',
+                            'status' => JobApplicationStatus::Saved,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'contract',
+                            'source_url' => 'https://cloud-harbor.example.com/jobs/angular-consultant',
+                            'next_action_at' => '2026-09-15 18:00:00',
+                            'salary_min' => 400,
+                            'salary_max' => 480,
+                            'currency' => 'EUR',
+                            'notes' => 'Daily-rate role. Tailor the CV before applying.',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Meridian Health',
+                    'website' => 'https://meridian-health.example.com',
+                    'location' => 'Munich, Germany',
+                    'notes' => 'Digital health company with a regulated product environment.',
+                    'applications' => [
+                        [
+                            'position' => 'Frontend Platform Engineer',
+                            'status' => JobApplicationStatus::Rejected,
+                            'work_mode' => WorkMode::Hybrid,
+                            'employment_type' => 'full-time',
+                            'applied_at' => '2026-05-22',
+                            'notes' => 'No response after the technical assignment; closed after follow-up.',
+                            'interviews' => [
+                                [
+                                    'type' => InterviewType::Technical,
+                                    'scheduled_at' => '2026-06-05 14:00:00',
+                                    'contact_name' => 'Jonas Weber',
+                                    'contact_email' => 'jonas@meridian-health.example.com',
+                                    'location_or_link' => 'https://meet.example.com/meridian-technical',
+                                    'notes' => 'Take-home review and frontend system design.',
+                                    'outcome' => InterviewOutcome::Failed,
+                                ],
+                            ],
+                        ],
+                        [
+                            'position' => 'UI Infrastructure Engineer',
+                            'status' => JobApplicationStatus::Withdrawn,
+                            'work_mode' => WorkMode::Onsite,
+                            'employment_type' => 'full-time',
+                            'applied_at' => '2026-08-03',
+                            'notes' => 'Withdrew after learning that relocation was required.',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Ember Commerce',
+                    'website' => 'https://ember-commerce.example.com',
+                    'location' => 'Warsaw, Poland',
+                    'notes' => 'Commerce platform serving independent European retailers.',
+                    'applications' => [
+                        [
+                            'position' => 'Senior Full-stack Engineer',
+                            'status' => JobApplicationStatus::Offer,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://ember-commerce.example.com/jobs/full-stack',
+                            'applied_at' => '2026-07-28',
+                            'next_action_at' => '2026-09-16 17:00:00',
+                            'salary_min' => 74_000,
+                            'salary_max' => 88_000,
+                            'currency' => 'EUR',
+                            'notes' => 'Review the offer, benefits, and on-call expectations.',
+                            'interviews' => [
+                                [
+                                    'type' => InterviewType::Technical,
+                                    'scheduled_at' => '2026-08-12 13:00:00',
+                                    'contact_name' => 'Kasia Nowak',
+                                    'contact_email' => 'kasia@ember-commerce.example.com',
+                                    'location_or_link' => 'https://meet.example.com/ember-technical',
+                                    'notes' => 'API design and Angular debugging exercise.',
+                                    'outcome' => InterviewOutcome::Passed,
+                                ],
+                                [
+                                    'type' => InterviewType::Final,
+                                    'scheduled_at' => '2026-08-26 15:30:00',
+                                    'contact_name' => 'Piotr Zielinski',
+                                    'contact_email' => 'piotr@ember-commerce.example.com',
+                                    'location_or_link' => 'https://meet.example.com/ember-final',
+                                    'notes' => 'Final discussion with the engineering director.',
+                                    'outcome' => InterviewOutcome::Passed,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'NovaWorks',
+                    'website' => 'https://novaworks.example.com',
+                    'location' => 'Remote',
+                    'notes' => 'Product studio delivering Laravel and Angular applications.',
+                    'applications' => [
+                        [
+                            'position' => 'PHP and Angular Engineer',
+                            'status' => JobApplicationStatus::Applied,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'full-time',
+                            'source_url' => 'https://novaworks.example.com/careers/php-angular',
+                            'applied_at' => '2026-09-09',
+                            'next_action_at' => '2026-09-23 10:00:00',
+                            'salary_min' => 60_000,
+                            'salary_max' => 72_000,
+                            'currency' => 'EUR',
+                            'notes' => 'Application sent through the company careers page.',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Linear Works',
+                    'website' => 'https://linear-works.example.com',
+                    'location' => 'London, United Kingdom',
+                    'notes' => null,
+                    'applications' => [
+                        [
+                            'position' => 'TypeScript Engineer',
+                            'status' => JobApplicationStatus::Rejected,
+                            'work_mode' => WorkMode::Remote,
+                            'employment_type' => 'full-time',
+                            'applied_at' => '2026-06-30',
+                            'notes' => 'Position received a high number of applications.',
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'Monolith Systems',
+                    'website' => null,
+                    'location' => 'Belgrade, Serbia',
+                    'notes' => 'Enterprise software vendor migrating legacy internal products.',
+                    'applications' => [
+                        [
+                            'position' => 'Software Engineer',
+                            'status' => JobApplicationStatus::Rejected,
+                            'work_mode' => WorkMode::Onsite,
+                            'employment_type' => 'full-time',
+                            'applied_at' => '2026-08-14',
+                            'notes' => 'Rejected after compensation expectations did not align.',
                         ],
                     ],
                 ],

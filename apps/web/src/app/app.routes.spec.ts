@@ -3,7 +3,7 @@ import { AppShellComponent } from './layout/app-shell/app-shell.component';
 import { ApplicationDetailsPageComponent } from './pages/application-details-page/application-details-page.component';
 import { ApplicationsPageComponent } from './pages/applications-page/applications-page.component';
 import { CompaniesPageComponent } from './pages/companies-page/companies-page.component';
-import { JobTrackerPlaceholderComponent } from './pages/job-tracker-placeholder/job-tracker-placeholder.component';
+import { DashboardPageComponent } from './pages/dashboard-page/dashboard-page.component';
 import { UsersPageComponent } from './pages/users-page/users-page.component';
 import { routes } from './app.routes';
 
@@ -44,7 +44,7 @@ describe('application routes', () => {
 
     expect(await applicationsRoute?.loadComponent?.()).toBe(ApplicationsPageComponent);
     expect(await detailsRoute?.loadComponent?.()).toBe(ApplicationDetailsPageComponent);
-    expect(await dashboardRoute?.loadComponent?.()).toBe(JobTrackerPlaceholderComponent);
+    expect(await dashboardRoute?.loadComponent?.()).toBe(DashboardPageComponent);
     expect(await usersRoute?.loadComponent?.()).toBe(UsersPageComponent);
   });
 });
