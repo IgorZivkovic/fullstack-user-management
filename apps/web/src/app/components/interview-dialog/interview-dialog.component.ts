@@ -92,7 +92,8 @@ export class InterviewDialogComponent {
           return;
         }
 
-        const { server: _server, ...remainingErrors } = control.errors ?? {};
+        const remainingErrors = { ...control.errors };
+        delete remainingErrors['server'];
         control.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null, {
           emitEvent: false,
         });
@@ -137,7 +138,8 @@ export class InterviewDialogComponent {
   private applyServerErrors(errors: InterviewFieldErrors): void {
     Object.values(this.form.controls).forEach((control) => {
       if (control.hasError('server')) {
-        const { server: _server, ...remainingErrors } = control.errors ?? {};
+        const remainingErrors = { ...control.errors };
+        delete remainingErrors['server'];
         control.setErrors(Object.keys(remainingErrors).length > 0 ? remainingErrors : null);
       }
     });
