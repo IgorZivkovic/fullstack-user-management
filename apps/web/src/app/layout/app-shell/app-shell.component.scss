@@ -71,7 +71,7 @@
   min-width: 0;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 980px) {
   .shell-header__content {
     flex-wrap: wrap;
   }
@@ -80,6 +80,12 @@
     order: 3;
     width: 100%;
     overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .shell-nav::-webkit-scrollbar {
+    display: none;
   }
 }
 

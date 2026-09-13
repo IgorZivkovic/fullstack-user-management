@@ -33,10 +33,10 @@ describe('AppShellComponent', () => {
     fixture.detectChanges();
   });
 
-  it('shows the job tracker navigation and current account', () => {
+  it('shows the job application tracker navigation and current account', () => {
     const text = fixture.nativeElement.textContent;
 
-    expect(text).toContain('Job Tracker');
+    expect(text).toContain('Job Application Tracker');
     expect(text).toContain('Dashboard');
     expect(text).toContain('Applications');
     expect(text).toContain('Companies');
